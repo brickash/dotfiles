@@ -1,4 +1,6 @@
 .github/
+docs/
+scripts/
 install.sh
 LICENSE
 README.md

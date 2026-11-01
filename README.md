@@ -6,22 +6,24 @@
 
 ```text
 .
-├── .chezmoi.yaml.tmpl             # chezmoi 初始化模板：仓库路径和身份数据
-├── .chezmoiignore                 # 不部署到主目录的仓库文件
-├── .github/workflows/             # 安装脚本的 CI 检查
-├── docs/                          # 工具指南与参考调查，不部署
-├── dot_gitconfig                  # ~/.gitconfig 占位文件
-├── install.sh                     # 安装 chezmoi（如有需要）并初始化、应用配置
-├── scripts/readme-tree.sh         # 对齐 README 结构树注释
-├── private_dot_config/            # 部署到 ~/.config，目录权限为 0700
-│   ├── delta/config               # Git 差异显示配置
-│   ├── ghostty/config             # 本机 Ghostty 终端配置
+├── .chezmoi.yaml.tmpl                # chezmoi 初始化模板：仓库路径和身份数据
+├── .chezmoidata/aerospace.yaml       # AeroSpace 浮动应用清单
+├── .chezmoiignore                    # 不部署到主目录的仓库文件
+├── .github/workflows/                # 安装脚本的 CI 检查
+├── docs/                             # 工具指南与参考调查，不部署
+├── dot_gitconfig                     # ~/.gitconfig 占位文件
+├── install.sh                        # 安装 chezmoi（如有需要）并初始化、应用配置
+├── scripts/readme-tree.sh            # 对齐 README 结构树注释
+├── private_dot_config/               # 部署到 ~/.config，目录权限为 0700
+│   ├── aerospace/aerospace.toml.tmpl # AeroSpace 窗口管理配置模板
+│   ├── delta/config                  # Git 差异显示配置
+│   ├── ghostty/config                # 本机 Ghostty 终端配置
 │   ├── git/
-│   │   ├── config.tmpl            # Git 全局配置模板
-│   │   ├── ignore                 # Git 全局忽略规则
-│   │   └── message                # Git 提交信息模板
+│   │   ├── config.tmpl               # Git 全局配置模板
+│   │   ├── ignore                    # Git 全局忽略规则
+│   │   └── message                   # Git 提交信息模板
 │   └── private_karabiner/
-│       └── private_karabiner.json # Karabiner-Elements 配置
+│       └── private_karabiner.json    # Karabiner-Elements 配置
 ├── LICENSE
 └── README.md
 ```
@@ -61,6 +63,7 @@ chezmoi status
 |---|---|
 | [Git 与 delta](docs/guides/git.md) | 身份、认证、依赖、配置行为和部署 |
 | [Ghostty](docs/guides/ghostty.md) | 配置来源、快捷键、部署和验证 |
+| [AeroSpace](docs/guides/aerospace.md) | 窗口布局、快捷键、浮动规则及部署 |
 | [Karabiner-Elements](docs/guides/karabiner.md) | 按键规则、来源、部署和验证 |
 | [键盘改键调查](docs/references/karabiner-modifier-keys.md) | 修饰键思路、兼容性和待验证事项 |
 

@@ -15,6 +15,7 @@
 ├── scripts/readme-tree.sh         # 对齐 README 结构树注释
 ├── private_dot_config/            # 部署到 ~/.config，目录权限为 0700
 │   ├── delta/config               # Git 差异显示配置
+│   ├── ghostty/config             # 本机 Ghostty 终端配置
 │   ├── git/
 │   │   ├── config.tmpl            # Git 全局配置模板
 │   │   ├── ignore                 # Git 全局忽略规则
@@ -59,6 +60,7 @@ chezmoi status
 | 文档 | 内容 |
 |---|---|
 | [Git 与 delta](docs/guides/git.md) | 身份、认证、依赖、配置行为和部署 |
+| [Ghostty](docs/guides/ghostty.md) | 配置来源、快捷键、部署和验证 |
 | [Karabiner-Elements](docs/guides/karabiner.md) | 按键规则、来源、部署和验证 |
 | [键盘改键调查](docs/references/karabiner-modifier-keys.md) | 修饰键思路、兼容性和待验证事项 |
 

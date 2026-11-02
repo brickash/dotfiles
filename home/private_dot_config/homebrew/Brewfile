@@ -124,6 +124,8 @@ cask "ghostty"
 cask "google-chrome"
 # Homebrew's official GUI
 cask "homebrew-app"
+# Java IDE by JetBrains
+cask "intellij-idea"
 # Keyboard customiser
 cask "karabiner-elements"
 # Open-source keystroke visualiser

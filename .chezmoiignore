@@ -1,6 +1,7 @@
 .github/
 docs/
 scripts/
+tests/
 install.sh
 LICENSE
 README.md

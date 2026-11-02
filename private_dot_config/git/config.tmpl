@@ -8,6 +8,10 @@
 	name = {{ .name }}
 	email = {{ .email }}
 
+{{- $configDir := env "XDG_CONFIG_HOME" | default (joinPath .chezmoi.homeDir ".config") }}
+[include]
+	path = {{ joinPath $configDir "git" "identities.config" | quote }}
+
 [init]
     defaultBranch = main
 

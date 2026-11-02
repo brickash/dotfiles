@@ -12,8 +12,10 @@
 ├── .github/workflows/                # 安装脚本的 CI 检查
 ├── docs/                             # 工具指南与参考调查，不部署
 ├── dot_gitconfig                     # ~/.gitconfig 占位文件
+├── dot_local/bin/                    # 本机 Git 目录身份管理工具
 ├── install.sh                        # 安装 chezmoi（如有需要）并初始化、应用配置
 ├── scripts/readme-tree.sh            # 对齐 README 结构树注释
+├── tests/                            # Git 身份功能回归测试
 ├── private_dot_config/               # 部署到 ~/.config，目录权限为 0700
 │   ├── aerospace/aerospace.toml.tmpl # AeroSpace 窗口管理配置模板
 │   ├── delta/config                  # Git 差异显示配置

@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""Manage local, directory-specific Git identities."""
+
+import hashlib
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tempfile
+
+
+def fail(message):
+    raise ValueError(message)
+
+
+def directory(value):
+    path = os.path.realpath(os.path.expanduser(value))
+    if any(c in path for c in "\t\r\n*?[]\\"):
+        fail("目录不能包含制表符、换行、反斜杠或 Git 通配符 * ? [ ]")
+    if path == "/":
+        fail("不能将根目录作为身份目录")
+    return path
+
+
+def config_root():
+    value = os.environ.get("XDG_CONFIG_HOME")
+    if value and not os.path.isabs(value):
+        fail("XDG_CONFIG_HOME 必须是绝对路径")
+    return Path(value or str(Path.home() / ".config")) / "git"
+
+
+def atomic_write(path, content):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix=".git-identity-", dir=str(path.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            stream.write(content)
+        os.replace(name, path)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+
+def git_config(path, *args):
+    return subprocess.run(["git", "config", "--file", str(path), *args],
+                          check=True, text=True, stdout=subprocess.PIPE).stdout
+
+
+def load_entries(map_file):
+    entries = {}
+    slugs = set()
+    if not map_file.exists():
+        return entries
+    for line in map_file.read_text(encoding="utf-8").splitlines():
+        parts = line.split("\t")
+        if len(parts) != 2 or not re.fullmatch(r"[A-Za-z0-9._-]+", parts[1]) or parts[1] in (".", ".."):
+            fail("身份映射格式无效；请先检查 identities.map")
+        path, slug = directory(parts[0]), parts[1]
+        if path in entries or slug in slugs:
+            fail("身份映射存在重复路径或标识碰撞；请先手动检查 identities.map")
+        entries[path] = slug
+        slugs.add(slug)
+    return entries
+
+
+def write_includes(config_dir, entries):
+    config_dir.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix=".git-identity-", dir=str(config_dir))
+    os.close(fd)
+    try:
+        for path, slug in sorted(entries.items(), key=lambda item: (item[0].count("/"), item[0])):
+            identity = config_dir / "identities" / (slug + ".config")
+            if not identity.is_file():
+                fail("身份文件不存在: " + str(identity))
+            git_config(name, "--add", "includeIf.gitdir:" + path + "/.path", str(identity))
+        os.replace(name, config_dir / "identities.config")
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+
+def write_map(config_dir, entries):
+    atomic_write(config_dir / "identities.map", "".join(
+        path + "\t" + slug + "\n" for path, slug in sorted(entries.items())))
+
+
+def main():
+    args = sys.argv[1:]
+    if not args or (args[0] == "add" and len(args) != 4) or (args[0] == "remove" and len(args) != 2) or (args[0] in ("list", "refresh") and len(args) != 1) or args[0] not in ("add", "remove", "list", "refresh"):
+        fail("用法: git-identity add <目录> <姓名> <邮箱> | list | remove <目录> | refresh")
+    root = config_root()
+    entries = load_entries(root / "identities.map")
+    if args[0] == "list":
+        for path, slug in sorted(entries.items()):
+            cfg = root / "identities" / (slug + ".config")
+            print("{}\t{} <{}>".format(path, git_config(cfg, "--get", "user.name").strip(), git_config(cfg, "--get", "user.email").strip()))
+        return
+    if args[0] == "refresh":
+        write_includes(root, entries)
+        return
+    path = directory(args[1])
+    if args[0] == "remove":
+        if path not in entries:
+            fail("目录没有配置身份: " + path)
+        slug = entries.pop(path)
+        write_includes(root, entries)
+        write_map(root, entries)
+        (root / "identities" / (slug + ".config")).unlink(missing_ok=True)
+        print("已移除 " + path)
+        return
+    if not os.path.isdir(path):
+        fail("目录不存在: " + path)
+    slug = entries.get(path) or hashlib.sha256(path.encode("utf-8")).hexdigest()
+    cfg = root / "identities" / (slug + ".config")
+    if path not in entries and (slug in entries.values() or cfg.exists()):
+        fail("身份文件已存在，拒绝覆盖: " + str(cfg))
+    cfg.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(prefix=".git-identity-", dir=str(cfg.parent))
+    os.close(fd)
+    try:
+        git_config(name, "user.name", args[2])
+        git_config(name, "user.email", args[3])
+        os.replace(name, cfg)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+    entries[path] = slug
+    write_includes(root, entries)
+    write_map(root, entries)
+    print("已配置 " + path)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (ValueError, OSError, UnicodeError, subprocess.CalledProcessError) as error:
+        print("git-identity: " + str(error), file=sys.stderr)
+        sys.exit(1)

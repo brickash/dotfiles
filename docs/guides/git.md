@@ -8,7 +8,7 @@
 - 当前比对基线：[`8ac90fa08b5224aefd39ded2a626a8f884c24814`](https://github.com/signalridge/dotfiles/commit/8ac90fa08b5224aefd39ded2a626a8f884c24814)
 - 比对范围：`dot_gitconfig`、`private_dot_config/git/config.tmpl`、`private_dot_config/git/ignore`、`private_dot_config/git/message` 和 `private_dot_config/delta/config`。
 
-与上述基线相比，五个文件的路径相同；仅 `private_dot_config/git/config.tmpl` 的身份变量不同：
+与上述基线相比，五个文件的路径相同；`private_dot_config/git/config.tmpl` 使用本仓库的身份变量，并增加目录身份 include：
 
 | 配置项 | 上游 | 本仓库 |
 |---|---|---|
@@ -16,6 +16,7 @@
 | `user.email` | `{{ .gitEmail }}` | `{{ .email }}` |
 
 本仓库通过 `.chezmoi.yaml.tmpl` 提供 `name` 和 `email`，不依赖上游的初始化模板或 `gitUsername`、`gitEmail` 数据。其余四个文件在该基线下内容逐字节一致。这里记录的是这五个文件的差异，不代表两个仓库的其他配置一致。
+`config.tmpl` 还包含本机目录身份配置的 `[include]`，由 `git-identity` 维护；不自动引入上游同名配置。
 
 ## 检查与合入上游
 
@@ -43,6 +44,7 @@ git rev-parse origin/main
 | `private_dot_config/git/ignore` | `~/.config/git/ignore` | Git 全局忽略规则 |
 | `private_dot_config/git/message` | `~/.config/git/message` | 提交信息模板 |
 | `private_dot_config/delta/config` | `~/.config/delta/config` | delta 差异显示样式 |
+| `dot_local/bin/executable_git-identity` | `~/.local/bin/git-identity` | 管理本机目录身份 |
 
 ## 身份与认证
 
@@ -57,6 +59,24 @@ git config --show-origin --get user.email
 ```
 
 避免用 `git config --global` 修改由 chezmoi 管理的身份：它可能写入 `~/.gitconfig`，并覆盖 XDG 配置中的设置。直接查询有效配置时不带 `--global`，以包含两处全局配置及当前仓库的覆盖值。
+
+### 按目录切换身份
+
+`git-identity` 使用 Python 3 和 Git，将指定目录下的仓库切换到对应身份；未匹配时沿用上述默认身份。工具只管理本机身份数据，不把工作身份写入 dotfiles 仓库。先部署 Git 配置及命令，确认 `~/.local/bin` 在 PATH 中：
+
+```sh
+chezmoi diff ~/.config/git/config ~/.local/bin/git-identity
+chezmoi apply ~/.config/git/config ~/.local/bin/git-identity
+git-identity add ~/work "Work User" work@example.com
+git-identity list
+git-identity remove ~/work
+```
+
+命令还支持 `git-identity refresh`，根据已有映射重新生成 include 文件。`add` 要求目录存在，并以真实路径处理相对路径和符号链接；为避免 Git 路径通配符带来意外匹配，目录名不能包含 `*`、`?`、`[`、`]`、反斜杠、制表符或换行。多个目录可使用不同身份；嵌套目录优先于外层目录，仓库级配置仍可覆盖。删除不存在的映射会报错，不删除其他身份文件。
+
+本机数据位于 `${XDG_CONFIG_HOME:-~/.config}/git/identities.map`、`identities.config` 和 `identities/*.config`，文件使用私有权限。工具兼容 back 仓库已有的映射和身份文件；如发现旧映射中的路径或标识碰撞，会拒绝修改，需先手动检查。迁移仓库不会迁移这些本机数据；换机器需重新配置或由用户安全迁移。
+
+Git 模板在 chezmoi 渲染时将当时的 `XDG_CONFIG_HOME` 写入 include 路径，未设置时使用 `~/.config`。修改该环境变量后，须在新环境重新 `chezmoi apply ~/.config/git/config`，并自行处理旧数据；如果采用非默认 XDG 路径，还需确保 Git 实际加载了此受管全局配置（其目标仍是 `~/.config/git/config`）。不要假定改环境变量会自动移动身份数据。
 
 GitHub HTTPS 凭据使用 `gh auth git-credential`；本仓库不保存登录令牌，部署配置不等于登录。可使用 `gh auth status` 检查登录状态，必要时运行 `gh auth login`。其他 Git 服务不使用此 GitHub 专用 helper。
 

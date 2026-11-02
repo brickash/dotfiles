@@ -31,8 +31,9 @@
 │       ├── homebrew/Brewfile             # 本机 Homebrew 软件清单
 │       ├── mise/config.toml.tmpl         # mise 全局工具与环境配置
 │       ├── nvim/                         # 本机 LazyVim 配置
-│       └── private_karabiner/
+│       ├── private_karabiner/
 │           └── private_karabiner.json    # Karabiner-Elements 配置
+│       └── yazi/                         # Yazi 文件管理器配置
 ├── LICENSE
 └── README.md
 ```
@@ -80,6 +81,7 @@ chezmoi status
 | [Homebrew](docs/guides/homebrew.md) | Brewfile 来源、维护和安装边界 |
 | [mise](docs/guides/mise.md) | 工具声明、风险、部署和验证 |
 | [LazyVim](docs/guides/lazyvim.md) | 纳管范围、插件锁文件和维护 |
+| [Yazi](docs/guides/yazi.md) | 文件管理器配置、快捷键和部署 |
 | [Karabiner-Elements](docs/guides/karabiner.md) | 按键规则、来源、部署和验证 |
 | [键盘改键调查](docs/references/karabiner-modifier-keys.md) | 修饰键思路、兼容性和待验证事项 |
 

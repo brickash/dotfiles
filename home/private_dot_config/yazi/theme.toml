@@ -1,0 +1,33 @@
+# Dracula 调色板。
+[mode]
+normal_main = { fg = "#282a36", bg = "#bd93f9", bold = true }
+normal_alt = { fg = "#bd93f9", bg = "reset", bold = true }
+select_main = { fg = "#282a36", bg = "#50fa7b", bold = true }
+select_alt = { fg = "#50fa7b", bg = "reset", bold = true }
+unset_main = { fg = "#282a36", bg = "#ff5555", bold = true }
+unset_alt = { fg = "#ff5555", bg = "reset", bold = true }
+
+[status]
+sep_left = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+overall = { fg = "reset", bg = "reset" }
+
+[filetype]
+rules = [
+  { mime = "image/*", fg = "#ff79c6" },
+  { mime = "video/*", fg = "#f1fa8c" },
+  { mime = "audio/*", fg = "#f1fa8c" },
+  { mime = "application/zip", fg = "#ff5555" },
+  { mime = "application/gzip", fg = "#ff5555" },
+  { mime = "application/x-tar", fg = "#ff5555" },
+  { mime = "application/x-bzip2", fg = "#ff5555" },
+  { mime = "application/x-7z-compressed", fg = "#ff5555" },
+  { mime = "application/x-rar", fg = "#ff5555" },
+  { mime = "application/x-xz", fg = "#ff5555" },
+  { mime = "application/pdf", fg = "#8be9fd" },
+  { mime = "application/*doc*", fg = "#50fa7b" },
+  { mime = "application/*sheet*", fg = "#50fa7b" },
+  { mime = "application/*presentation*", fg = "#50fa7b" },
+  { url = "*", fg = "reset" },
+  { url = "*/", fg = "#8be9fd", bold = true },
+]

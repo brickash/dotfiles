@@ -9,11 +9,11 @@ font-thicken = true
 adjust-cell-height = 6
 
 # --- Theme and Colors ---
-theme = Kanagawa Wave
-theme = TokyoNight
+#theme = Kanagawa Wave
+#theme = TokyoNight
 #theme = Catppuccin Mocha
 #theme = Nord
-#theme = Dracula
+theme = Dracula
 
 # --- Window and Appearance ---
 background-opacity = 1

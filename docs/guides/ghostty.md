@@ -4,9 +4,9 @@
 
 ## 来源与纳管范围
 
-仓库中的 `home/private_dot_config/ghostty/config` 部署到 `~/.config/ghostty/config`。它从本机配置纳管，以 [lltx 的现代化终端配置指南](https://gist.github.com/lltx/a61f98fdb761c9af7c5fd6cbfe963842)的 Ghostty 部分为参考；不自动同步该指南，也不因此安装或纳管其中的 Zoxide、Yazi 和 Oh-My-Zsh。
+仓库中的 `home/private_dot_config/ghostty/config` 部署到 `~/.config/ghostty/config`。它从本机配置纳管，以 [lltx 的现代化终端配置指南](https://gist.github.com/lltx/a61f98fdb761c9af7c5fd6cbfe963842)的 Ghostty 部分为参考，不自动同步该指南。Yazi 配置另见 [Yazi 指南](yazi.md)；仓库未纳管指南中的 Zoxide 或 Oh-My-Zsh 初始化配置。
 
-与查阅时的参考配置相比，本机增加了 `TokyoNight` 主题行及几个注释掉的候选主题。配置中 `Kanagawa Wave` 和 `TokyoNight` 两行均未注释；本机 `ghostty +show-config` 显示当前生效的是后面的 `TokyoNight`。切换主题时应检查实际生效值，避免被前面的配置行误导。
+参考配置使用 `Kanagawa Wave`；本机调整为 Ghostty 内置的 `Dracula`。其他候选主题保留为注释，只有一条生效的 `theme` 配置。
 
 配置包含 macOS 专用选项；仓库目前没有按操作系统排除此文件。仓库不安装 Ghostty 或字体，需自行安装 `Maple Mono NF CN`；缺少字体时实际显示可能回退。
 

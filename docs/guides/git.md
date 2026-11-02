@@ -44,6 +44,7 @@ git rev-parse origin/main
 | `private_dot_config/git/ignore` | `~/.config/git/ignore` | Git 全局忽略规则 |
 | `private_dot_config/git/message` | `~/.config/git/message` | 提交信息模板 |
 | `private_dot_config/delta/config` | `~/.config/delta/config` | delta 差异显示样式 |
+| `private_dot_config/gh/private_config.yml` | `~/.config/gh/config.yml` | GitHub CLI 偏好 |
 | `dot_local/bin/executable_git-identity` | `~/.local/bin/git-identity` | 管理本机目录身份 |
 
 ## 身份与认证
@@ -79,6 +80,10 @@ git-identity remove ~/work
 Git 模板在 chezmoi 渲染时将当时的 `XDG_CONFIG_HOME` 写入 include 路径，未设置时使用 `~/.config`。修改该环境变量后，须在新环境重新 `chezmoi apply ~/.config/git/config`，并自行处理旧数据；如果采用非默认 XDG 路径，还需确保 Git 实际加载了此受管全局配置（其目标仍是 `~/.config/git/config`）。不要假定改环境变量会自动移动身份数据。
 
 GitHub HTTPS 凭据使用 `gh auth git-credential`；本仓库不保存登录令牌，部署配置不等于登录。可使用 `gh auth status` 检查登录状态，必要时运行 `gh auth login`。其他 Git 服务不使用此 GitHub 专用 helper。
+
+本仓库纳管 `~/.config/gh/config.yml` 中的 GitHub CLI 偏好，包括 HTTPS、交互选项及 `gh co` 别名；不纳管 `hosts.yml` 或登录凭据。配置取自本机，保留了 back 仓库配置中共有的设置和本机额外偏好；不自动同步参考项目。
+
+修改本机偏好后，可用 `chezmoi add ~/.config/gh/config.yml` 同步到仓库，先检查其中没有凭据或其他不希望提交的数据。从仓库部署时先使用 `chezmoi diff ~/.config/gh/config.yml` 预览，再用 `chezmoi apply ~/.config/gh/config.yml` 应用。
 
 ## 行为与依赖
 

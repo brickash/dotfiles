@@ -19,6 +19,7 @@
 ├── private_dot_config/               # 部署到 ~/.config，目录权限为 0700
 │   ├── aerospace/aerospace.toml.tmpl # AeroSpace 窗口管理配置模板
 │   ├── delta/config                  # Git 差异显示配置
+│   ├── gh/private_config.yml         # GitHub CLI 偏好
 │   ├── ghostty/config                # 本机 Ghostty 终端配置
 │   ├── git/
 │   │   ├── config.tmpl               # Git 全局配置模板

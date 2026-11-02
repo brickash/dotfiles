@@ -22,6 +22,7 @@
 │   │   ├── config.tmpl               # Git 全局配置模板
 │   │   ├── ignore                    # Git 全局忽略规则
 │   │   └── message                   # Git 提交信息模板
+│   ├── homebrew/Brewfile             # 本机 Homebrew 软件清单
 │   ├── mise/config.toml.tmpl         # mise 全局工具与环境配置
 │   └── private_karabiner/
 │       └── private_karabiner.json    # Karabiner-Elements 配置
@@ -65,6 +66,7 @@ chezmoi status
 | [Git 与 delta](docs/guides/git.md) | 身份、认证、依赖、配置行为和部署 |
 | [Ghostty](docs/guides/ghostty.md) | 配置来源、快捷键、部署和验证 |
 | [AeroSpace](docs/guides/aerospace.md) | 窗口布局、快捷键、浮动规则及部署 |
+| [Homebrew](docs/guides/homebrew.md) | Brewfile 来源、维护和安装边界 |
 | [mise](docs/guides/mise.md) | 工具声明、风险、部署和验证 |
 | [Karabiner-Elements](docs/guides/karabiner.md) | 按键规则、来源、部署和验证 |
 | [键盘改键调查](docs/references/karabiner-modifier-keys.md) | 修饰键思路、兼容性和待验证事项 |

@@ -32,9 +32,13 @@ Simple Modifications 先将 Caps Lock 转成左 Control，随后 Complex Modific
 
 空格激活规则配置了 200 毫秒按住阈值、300 毫秒单按超时和 200 毫秒延迟动作。快速按下其他键或长时间单独按住空格时，不应假定一定会触发功能层或输入普通空格；实际结果取决于事件顺序。
 
-“Disable SpaceFN mode after last typing”规则当前启用，目的是减少连续打字时空格误触功能层。它通过 `_spacefn_mode` 和 `_lock_reset_spacefn_mode` 标记、200 毫秒延迟及取消后的 shell 命令控制空格激活；`spacefn_mode` 则是功能层状态，是另一个变量。shell 命令等待 0.2 秒，读取 Karabiner 状态文件并在满足条件时调用 `karabiner_cli` 重置变量。规则顺序与按键时序会影响结果，不能保证每次按键后都是固定 200 毫秒。
+“Disable SpaceFN mode after last typing”规则旨在减少连续打字时空格误触功能层。由于快速输入 `Shift+字母` 时微信输入法误切换中英文，该规则已在本机暂时关闭并同步到仓库；关闭后用户观察到问题消失，具体原因尚未确认。
+
+该规则通过 `_spacefn_mode` 和 `_lock_reset_spacefn_mode` 标记、200 毫秒延迟及取消后的 shell 命令控制空格激活；`spacefn_mode` 则是功能层状态，是另一个变量。shell 命令等待 0.2 秒，读取 Karabiner 状态文件并在满足条件时调用 `karabiner_cli` 重置变量。规则顺序与按键时序会影响结果，不能保证每次按键后都是固定 200 毫秒。
 
 命令使用 `/library/application support/org.pqrs/tmp/karabiner_grabber_manipulator_environment.json` 和 `/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli`。原样保留的小写 `/library` 在区分大小写的文件系统上可能不可用；快速打字后的行为需要在目标机器实测。
+
+- [ ] 排查微信输入法快速输入 `Shift+字母` 时误切换中英文：关闭整条防误触规则后用户观察到问题消失，但具体原因尚未确认。后续分别验证左右 Shift 处理及其他按键处理，并测试连续打字、普通空格与 SpaceFN；确认修复方案后再决定是否重新启用并同步仓库配置。
 
 ### 已保留但禁用的规则
 

@@ -18,7 +18,7 @@
 
 - **方向键采用 I/J/K/L**：与方向键布局一致；H/J/K/L 规则保留但禁用，避免 J、K 同时对应不同方向。H/N 当前用于 Page Up / Page Down。
 - **普通反引号保留原用途**：禁用社区方案中普通反引号转 Escape 的规则；SpaceFN 中仍有反引号和波浪号映射。
-- **打字防误触规则启用**：它尝试在连续输入期间阻止空格启动功能层，代价是刚打完字就使用 SpaceFN 可能不够顺手。规则含延迟动作、状态变量和本机 shell 命令，时序与路径风险见[使用指南](../guides/karabiner.md#spacefn-时序与防误触)。
+- **打字防误触规则**：已暂时关闭并同步到仓库，以排查 Shift 与微信输入法的冲突；待办与验证边界见[使用指南](../guides/karabiner.md#spacefn-时序与防误触)。它尝试在连续输入期间阻止空格启动功能层，代价是刚打完字就使用 SpaceFN 可能不够顺手；规则包含延迟动作、状态变量和本机 shell 命令。
 
 Karabiner 的[复杂规则优先级](https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-evaluation-priority/)为自上而下、首个匹配生效。启用新规则前应检查同一按键、修饰键及条件是否与已有规则重叠；例如 H/J/K/L 若与当前方向键、翻页规则同时启用，会产生遮挡。
 

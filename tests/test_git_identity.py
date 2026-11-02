@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 
-TOOL = Path(__file__).resolve().parents[1] / "dot_local/bin/executable_git-identity"
+TOOL = Path(__file__).resolve().parents[1] / "home/dot_local/bin/executable_git-identity"
 
 
 class GitIdentityTest(unittest.TestCase):

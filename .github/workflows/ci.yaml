@@ -13,6 +13,12 @@ jobs:
         CODESPACES: true
     steps:
       - uses: actions/checkout@v2
+      - name: Check README tree alignment
+        run: ./scripts/readme-tree.sh --check
+      - name: Test Git identities
+        run: python3 -m unittest discover -s tests -v
       - run: ./install.sh
+      - name: Verify chezmoi source root
+        run: test "$("$HOME/.local/bin/chezmoi" source-path)" = "$(pwd -P)/home"
       - name: chezmoi data
         run: '"$HOME/.local/bin/chezmoi" data'

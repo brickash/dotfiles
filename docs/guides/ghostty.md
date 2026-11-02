@@ -4,7 +4,7 @@
 
 ## 来源与纳管范围
 
-仓库中的 `private_dot_config/ghostty/config` 部署到 `~/.config/ghostty/config`。它从本机配置纳管，以 [lltx 的现代化终端配置指南](https://gist.github.com/lltx/a61f98fdb761c9af7c5fd6cbfe963842)的 Ghostty 部分为参考；不自动同步该指南，也不因此安装或纳管其中的 Zoxide、Yazi 和 Oh-My-Zsh。
+仓库中的 `home/private_dot_config/ghostty/config` 部署到 `~/.config/ghostty/config`。它从本机配置纳管，以 [lltx 的现代化终端配置指南](https://gist.github.com/lltx/a61f98fdb761c9af7c5fd6cbfe963842)的 Ghostty 部分为参考；不自动同步该指南，也不因此安装或纳管其中的 Zoxide、Yazi 和 Oh-My-Zsh。
 
 与查阅时的参考配置相比，本机增加了 `TokyoNight` 主题行及几个注释掉的候选主题。配置中 `Kanagawa Wave` 和 `TokyoNight` 两行均未注释；本机 `ghostty +show-config` 显示当前生效的是后面的 `TokyoNight`。切换主题时应检查实际生效值，避免被前面的配置行误导。
 

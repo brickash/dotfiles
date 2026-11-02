@@ -4,7 +4,7 @@
 
 ## 来源与范围
 
-`private_dot_config/aerospace/aerospace.toml.tmpl` 部署到 `~/.config/aerospace/aerospace.toml`，参考 [signalridge/dotfiles 的 AeroSpace 模板](https://github.com/signalridge/dotfiles/blob/8ac90fa08b5224aefd39ded2a626a8f884c24814/private_dot_config/aerospace/aerospace.toml.tmpl)。布局和快捷键沿用参考配置；浮动应用清单采用个人备份 `dotfiles-back` 中的配置，存放在 `.chezmoidata/aerospace.yaml`，不引入参考项目的 work/private 分类。不会自动同步上游变更。
+`home/private_dot_config/aerospace/aerospace.toml.tmpl` 部署到 `~/.config/aerospace/aerospace.toml`，参考 [signalridge/dotfiles 的 AeroSpace 模板](https://github.com/signalridge/dotfiles/blob/8ac90fa08b5224aefd39ded2a626a8f884c24814/private_dot_config/aerospace/aerospace.toml.tmpl)。布局和快捷键沿用参考配置；浮动应用清单采用个人备份 `dotfiles-back` 中的配置，存放在 `home/.chezmoidata/aerospace.yaml`，不引入参考项目的 work/private 分类。不会自动同步上游变更。
 
 该配置仅在 macOS 纳管，不安装 AeroSpace，也不授予辅助功能权限。配置启用登录启动；部署或重载前，请先确认布局和快捷键符合自己的使用习惯。
 
@@ -33,7 +33,7 @@
 
 ## 修改与部署
 
-浮动应用在 `.chezmoidata/aerospace.yaml` 中维护，窗口规则、显示器分配和快捷键在模板中维护。不要对渲染后的目标文件执行 `chezmoi add`，以免覆盖模板结构。
+浮动应用在 `home/.chezmoidata/aerospace.yaml` 中维护，窗口规则、显示器分配和快捷键在模板中维护。不要对渲染后的目标文件执行 `chezmoi add`，以免覆盖模板结构。
 
 ```sh
 chezmoi diff ~/.config/aerospace/aerospace.toml

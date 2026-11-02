@@ -6,32 +6,37 @@
 
 ```text
 .
-├── .chezmoi.yaml.tmpl                # chezmoi 初始化模板：仓库路径和身份数据
-├── .chezmoidata/aerospace.yaml       # AeroSpace 浮动应用清单
-├── .chezmoiignore                    # 不部署到主目录的仓库文件
-├── .github/workflows/                # 安装脚本的 CI 检查
-├── docs/                             # 工具指南与参考调查，不部署
-├── dot_gitconfig                     # ~/.gitconfig 占位文件
-├── dot_local/bin/                    # 本机 Git 目录身份管理工具
-├── install.sh                        # 安装 chezmoi（如有需要）并初始化、应用配置
-├── scripts/readme-tree.sh            # 对齐 README 结构树注释
-├── tests/                            # Git 身份功能回归测试
-├── private_dot_config/               # 部署到 ~/.config，目录权限为 0700
-│   ├── aerospace/aerospace.toml.tmpl # AeroSpace 窗口管理配置模板
-│   ├── delta/config                  # Git 差异显示配置
-│   ├── gh/private_config.yml         # GitHub CLI 偏好
-│   ├── ghostty/config                # 本机 Ghostty 终端配置
-│   ├── git/
-│   │   ├── config.tmpl               # Git 全局配置模板
-│   │   ├── ignore                    # Git 全局忽略规则
-│   │   └── message                   # Git 提交信息模板
-│   ├── homebrew/Brewfile             # 本机 Homebrew 软件清单
-│   ├── mise/config.toml.tmpl         # mise 全局工具与环境配置
-│   └── private_karabiner/
-│       └── private_karabiner.json    # Karabiner-Elements 配置
+├── .chezmoiroot                          # 将 home/ 设为部署源
+├── .chezmoiversion                       # 最低 chezmoi 版本 2.69.0
+├── .github/workflows/                    # 安装脚本的 CI 检查
+├── docs/                                 # 工具指南与参考调查，不部署
+├── install.sh                            # 安装 chezmoi 并初始化、应用配置
+├── scripts/readme-tree.sh                # 对齐 README 结构树注释
+├── tests/                                # Git 身份功能回归测试
+├── home/                                 # chezmoi 部署源
+│   ├── .chezmoi.yaml.tmpl                # 初始化模板：仓库路径和身份数据
+│   ├── .chezmoidata/aerospace.yaml       # AeroSpace 浮动应用清单
+│   ├── .chezmoiignore                    # 部署目标的平台筛选
+│   ├── dot_gitconfig                     # ~/.gitconfig 占位文件
+│   ├── dot_local/bin/                    # Git 目录身份管理工具
+│   └── private_dot_config/               # 部署到 ~/.config，目录权限为 0700
+│       ├── aerospace/aerospace.toml.tmpl # AeroSpace 窗口管理配置模板
+│       ├── delta/config                  # Git 差异显示配置
+│       ├── gh/private_config.yml         # GitHub CLI 偏好
+│       ├── ghostty/config                # 本机 Ghostty 终端配置
+│       ├── git/
+│       │   ├── config.tmpl               # Git 全局配置模板
+│       │   ├── ignore                    # Git 全局忽略规则
+│       │   └── message                   # Git 提交信息模板
+│       ├── homebrew/Brewfile             # 本机 Homebrew 软件清单
+│       ├── mise/config.toml.tmpl         # mise 全局工具与环境配置
+│       └── private_karabiner/
+│           └── private_karabiner.json    # Karabiner-Elements 配置
 ├── LICENSE
 └── README.md
 ```
+
+`.chezmoiroot` 指向 `home/`；仓库根目录的文档、脚本和测试不作为部署源。`.chezmoiversion` 要求 chezmoi 不低于 2.69.0。
 
 chezmoi 将 `dot_` 转为以点开头的目标名称；`private_` 为目标设置私有权限。应用时 `~/.config` 目录权限会设为 `0700`，可能影响需要以其他用户身份访问该目录的服务。
 
@@ -45,7 +50,9 @@ chezmoi 将 `dot_` 转为以点开头的目标名称；`private_` 为目标设�
 chezmoi init --source="$(pwd)"
 ```
 
-初始化时填写姓名和邮箱，已有值会保留；它们保存在 `~/.config/chezmoi/chezmoi.yaml`，并用于渲染 Git 身份。需要重新填写时：
+初始化时填写姓名和邮箱，已有值会保留；它们保存在 `~/.config/chezmoi/chezmoi.yaml`，并用于渲染 Git 身份。配置中的 `sourceDir` 保存仓库根目录；chezmoi 通过 `.chezmoiroot` 自动定位 `home/`，部署目标不因源文件迁移而变化。
+
+需要重新填写身份时：
 
 ```sh
 chezmoi init --data=false

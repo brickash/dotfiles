@@ -4,7 +4,7 @@
 
 ## 来源与范围
 
-`private_dot_config/mise/config.toml.tmpl` 原样取自个人备份 `dotfiles-back`，该版本源自 [signalridge/dotfiles](https://github.com/signalridge/dotfiles) 的 `a978087ba7393d87f5264f2c06562adbb70b71ad`。模板渲染到 `~/.config/mise/config.toml`，仅在 macOS 声明 `mac-cleanup`。与当前本地 signalridge 模板相比，本版本不包含按工作环境条件启用的 JAIST VPN 认证工具；不自动同步上游。
+`home/private_dot_config/mise/config.toml.tmpl` 原样取自个人备份 `dotfiles-back`，该版本源自 [signalridge/dotfiles](https://github.com/signalridge/dotfiles) 的 `a978087ba7393d87f5264f2c06562adbb70b71ad`。模板渲染到 `~/.config/mise/config.toml`，仅在 macOS 声明 `mac-cleanup`。与当前本地 signalridge 模板相比，本版本不包含按工作环境条件启用的 JAIST VPN 认证工具；不自动同步上游。
 
 这里只管理配置文件，不安装 mise、启用 shell integration，也不引入上游 `mise install` 或 `mise up` 自动化。模板注释中的 nix、MCP wrappers、`social-post`、CLIProxyAPI 等是参考环境说明，不代表本仓库提供这些组件，也不能假定已部署相关认证或保护措施。
 

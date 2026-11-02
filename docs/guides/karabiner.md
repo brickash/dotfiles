@@ -4,7 +4,7 @@
 
 ## 纳管范围
 
-仓库中的 `private_dot_config/private_karabiner/private_karabiner.json` 部署到 `~/.config/karabiner/karabiner.json`。它最初从 `dotfiles-back` 恢复，之后同步了本机调整；当前选中 `Default profile`，虚拟键盘类型为 ANSI。配置中关闭了 Karabiner 更新检查。
+仓库中的 `home/private_dot_config/private_karabiner/private_karabiner.json` 部署到 `~/.config/karabiner/karabiner.json`。它最初从 `dotfiles-back` 恢复，之后同步了本机调整；当前选中 `Default profile`，虚拟键盘类型为 ANSI。配置中关闭了 Karabiner 更新检查。
 
 仓库只管理主配置文件，不包含 Karabiner 的备份、规则资源或运行状态，也不安装软件或授予 macOS 权限。`private_` 标记使目标 Karabiner 目录和文件分别使用私有权限；整个 `~/.config` 目录也由仓库按私有权限管理。
 

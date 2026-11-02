@@ -6,16 +6,16 @@
 
 - 上游仓库：[signalridge/dotfiles](https://github.com/signalridge/dotfiles)
 - 当前比对基线：[`8ac90fa08b5224aefd39ded2a626a8f884c24814`](https://github.com/signalridge/dotfiles/commit/8ac90fa08b5224aefd39ded2a626a8f884c24814)
-- 比对范围：`dot_gitconfig`、`private_dot_config/git/config.tmpl`、`private_dot_config/git/ignore`、`private_dot_config/git/message` 和 `private_dot_config/delta/config`。
+- 比对范围：上游的 `dot_gitconfig`、`private_dot_config/git/config.tmpl`、`private_dot_config/git/ignore`、`private_dot_config/git/message` 和 `private_dot_config/delta/config`；本仓库对应路径位于 `home/` 下。
 
-与上述基线相比，五个文件的路径相同；`private_dot_config/git/config.tmpl` 使用本仓库的身份变量，并增加目录身份 include：
+与上述基线相比，除本仓库路径增加 `home/` 前缀外，`home/private_dot_config/git/config.tmpl` 使用本仓库的身份变量，并增加目录身份 include：
 
 | 配置项 | 上游 | 本仓库 |
 |---|---|---|
 | `user.name` | `{{ .gitUsername }}` | `{{ .name }}` |
 | `user.email` | `{{ .gitEmail }}` | `{{ .email }}` |
 
-本仓库通过 `.chezmoi.yaml.tmpl` 提供 `name` 和 `email`，不依赖上游的初始化模板或 `gitUsername`、`gitEmail` 数据。其余四个文件在该基线下内容逐字节一致。这里记录的是这五个文件的差异，不代表两个仓库的其他配置一致。
+本仓库通过 `home/.chezmoi.yaml.tmpl` 提供 `name` 和 `email`，不依赖上游的初始化模板或 `gitUsername`、`gitEmail` 数据。其余四个文件在该基线下内容逐字节一致。这里记录的是这五个文件的差异，不代表两个仓库的其他配置一致。
 `config.tmpl` 还包含本机目录身份配置的 `[include]`，由 `git-identity` 维护；不自动引入上游同名配置。
 
 ## 检查与合入上游
@@ -39,13 +39,13 @@ git rev-parse origin/main
 
 | 仓库文件 | 部署目标 | 用途 |
 |---|---|---|
-| `dot_gitconfig` | `~/.gitconfig` | 配置位置说明 |
-| `private_dot_config/git/config.tmpl` | `~/.config/git/config` | Git 身份、行为、工具和别名 |
-| `private_dot_config/git/ignore` | `~/.config/git/ignore` | Git 全局忽略规则 |
-| `private_dot_config/git/message` | `~/.config/git/message` | 提交信息模板 |
-| `private_dot_config/delta/config` | `~/.config/delta/config` | delta 差异显示样式 |
-| `private_dot_config/gh/private_config.yml` | `~/.config/gh/config.yml` | GitHub CLI 偏好 |
-| `dot_local/bin/executable_git-identity` | `~/.local/bin/git-identity` | 管理本机目录身份 |
+| `home/dot_gitconfig` | `~/.gitconfig` | 配置位置说明 |
+| `home/private_dot_config/git/config.tmpl` | `~/.config/git/config` | Git 身份、行为、工具和别名 |
+| `home/private_dot_config/git/ignore` | `~/.config/git/ignore` | Git 全局忽略规则 |
+| `home/private_dot_config/git/message` | `~/.config/git/message` | 提交信息模板 |
+| `home/private_dot_config/delta/config` | `~/.config/delta/config` | delta 差异显示样式 |
+| `home/private_dot_config/gh/private_config.yml` | `~/.config/gh/config.yml` | GitHub CLI 偏好 |
+| `home/dot_local/bin/executable_git-identity` | `~/.local/bin/git-identity` | 管理本机目录身份 |
 
 ## 身份与认证
 

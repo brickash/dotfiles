@@ -36,6 +36,7 @@
 │       │   ├── ignore                    # Git 全局忽略规则
 │       │   └── message                   # Git 提交信息模板
 │       ├── homebrew/Brewfile             # 本机 Homebrew 软件清单
+│       ├── lazygit/config.yml            # LazyGit 终端 Git 界面配置
 │       ├── mise/config.toml.tmpl         # mise 全局工具与环境配置
 │       ├── nvim/                         # 本机 LazyVim 配置
 │       ├── sheldon/plugins.toml          # Zsh 插件管理
@@ -90,6 +91,7 @@ chezmoi status
 | [Homebrew](docs/guides/homebrew.md) | Brewfile 来源、维护和安装边界 |
 | [mise](docs/guides/mise.md) | 工具声明、风险、部署和验证 |
 | [LazyVim](docs/guides/lazyvim.md) | 纳管范围、插件锁文件和维护 |
+| [LazyGit](docs/guides/lazygit.md) | Git 界面主题、使用和部署 |
 | [Yazi](docs/guides/yazi.md) | 文件管理器配置、快捷键和部署 |
 | [Atuin](docs/guides/atuin.md) | 历史搜索、同步设置和维护 |
 | [bat 与 btop](docs/guides/bat-btop.md) | 终端文件查看与系统监控 |

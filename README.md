@@ -26,6 +26,8 @@
 │   └── private_dot_config/               # 部署到 ~/.config，目录权限为 0700
 │       ├── aerospace/aerospace.toml.tmpl # AeroSpace 窗口管理配置模板
 │       ├── private_atuin/                # Atuin 历史搜索配置
+│       ├── bat/config                    # bat 文件查看配置
+│       ├── btop/btop.conf                # btop 资源监控配置
 │       ├── delta/config                  # Git 差异显示配置
 │       ├── gh/private_config.yml         # GitHub CLI 偏好
 │       ├── ghostty/config                # 本机 Ghostty 终端配置
@@ -90,6 +92,7 @@ chezmoi status
 | [LazyVim](docs/guides/lazyvim.md) | 纳管范围、插件锁文件和维护 |
 | [Yazi](docs/guides/yazi.md) | 文件管理器配置、快捷键和部署 |
 | [Atuin](docs/guides/atuin.md) | 历史搜索、同步设置和维护 |
+| [bat 与 btop](docs/guides/bat-btop.md) | 终端文件查看与系统监控 |
 | [Shell 与 Starship](docs/guides/shell.md) | Zsh 初始化、插件管理、依赖和风险 |
 | [Karabiner-Elements](docs/guides/karabiner.md) | 按键规则、来源、部署和验证 |
 | [键盘改键调查](docs/references/karabiner-modifier-keys.md) | 修饰键思路、兼容性和待验证事项 |

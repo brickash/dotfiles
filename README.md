@@ -16,6 +16,7 @@
 ├── home/                                 # chezmoi 部署源
 │   ├── .chezmoi.yaml.tmpl                # 初始化模板：仓库路径和身份数据
 │   ├── .chezmoidata/aerospace.yaml       # AeroSpace 浮动应用清单
+│   ├── .chezmoiexternal.toml             # 固定版本的 tmux 插件管理器
 │   ├── .chezmoiignore                    # 部署目标的平台筛选
 │   ├── dot_gitconfig                     # ~/.gitconfig 占位文件
 │   ├── dot_custom/                       # 参考 Zsh 环境、别名和函数
@@ -41,6 +42,7 @@
 │       ├── nvim/                         # 本机 LazyVim 配置
 │       ├── sheldon/plugins.toml          # Zsh 插件管理
 │       ├── starship.toml                 # Dracula 终端提示符
+│       ├── tmux/                         # tmux 会话、快捷键与插件配置
 │       ├── private_karabiner/
 │           └── private_karabiner.json    # Karabiner-Elements 配置
 │       └── yazi/                         # Yazi 文件管理器配置
@@ -94,6 +96,7 @@ chezmoi status
 | [LazyGit](docs/guides/lazygit.md) | Git 界面主题、使用和部署 |
 | [Yazi](docs/guides/yazi.md) | 文件管理器配置、快捷键和部署 |
 | [Atuin](docs/guides/atuin.md) | 历史搜索、同步设置和维护 |
+| [tmux](docs/guides/tmux.md) | 会话、快捷键、插件及恢复风险 |
 | [bat 与 btop](docs/guides/bat-btop.md) | 终端文件查看与系统监控 |
 | [Shell 与 Starship](docs/guides/shell.md) | Zsh 初始化、插件管理、依赖和风险 |
 | [Karabiner-Elements](docs/guides/karabiner.md) | 按键规则、来源、部署和验证 |

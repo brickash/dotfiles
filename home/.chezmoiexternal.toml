@@ -1,0 +1,6 @@
+[".config/tmux/plugins/tpm"]
+    type = "archive"
+    url = "https://github.com/tmux-plugins/tpm/archive/e261deb1b47614eed3400089ce7197dc68acc4eb.tar.gz"
+    checksum.sha256 = "72d92c512270d4857e27519ac97b92a52cf149afe4d92f26860c710f60bbbe37"
+    stripComponents = 1
+    refreshPeriod = "168h"

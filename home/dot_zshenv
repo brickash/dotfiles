@@ -1,0 +1,101 @@
+# Keep .zshenv side-effect free because it is loaded by every zsh process.
+# Do not run external commands here.
+
+# XDG Base Directory
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+
+path_remove() {
+    local p="$1"
+    [[ -n "$p" ]] || return 0
+    PATH=":$PATH:"
+    PATH="${PATH//:$p:/:}"
+    PATH="${PATH#:}"
+    PATH="${PATH%:}"
+}
+
+path_add_front() {
+    local p="$1"
+    [[ -n "$p" ]] || return 0
+    path_remove "$p"
+    PATH="$p${PATH:+:$PATH}"
+}
+
+path_add_back() {
+    local p="$1"
+    [[ -n "$p" ]] || return 0
+    path_remove "$p"
+    PATH="${PATH:+$PATH:}$p"
+}
+
+# PATH order after front-insertion: user dirs, Homebrew/Nix, then aqua fallback.
+AQUA_BIN_DIR="${AQUA_ROOT_DIR:-${XDG_DATA_HOME}/aquaproj-aqua}/bin"
+[[ -d "$AQUA_BIN_DIR" ]] && path_add_front "$AQUA_BIN_DIR"
+
+[[ -d "$HOME/.nix-profile/bin" ]] && path_add_front "$HOME/.nix-profile/bin"
+[[ -d "/opt/homebrew/bin" ]] && path_add_front "/opt/homebrew/bin"
+[[ -d "$HOME/.local/bin" ]] && path_add_front "$HOME/.local/bin"
+[[ -d "$HOME/bin" ]] && path_add_front "$HOME/bin"
+
+# Never expose mise shims at .zshenv phase.
+export MISE_SHIMS_DIR="${MISE_DATA_DIR:-${XDG_DATA_HOME}/mise}/shims"
+path_remove "$MISE_SHIMS_DIR"
+
+export PATH
+
+# aqua global config
+AQUA_CONFIG_PATH="${XDG_CONFIG_HOME}/aquaproj-aqua/aqua.yaml"
+if [[ -f "$AQUA_CONFIG_PATH" ]]; then
+    case ":${AQUA_GLOBAL_CONFIG:-}:" in
+    *":${AQUA_CONFIG_PATH}:"*) ;;
+    *) export AQUA_GLOBAL_CONFIG="${AQUA_CONFIG_PATH}${AQUA_GLOBAL_CONFIG:+:${AQUA_GLOBAL_CONFIG}}" ;;
+    esac
+fi
+
+# aqua policy: allow-list for non-standard registries (must be allow-listed once via `aqua policy allow`)
+AQUA_POLICY_PATH="${XDG_CONFIG_HOME}/aquaproj-aqua/aqua-policy.yaml"
+if [[ -f "$AQUA_POLICY_PATH" ]]; then
+    case ":${AQUA_POLICY_CONFIG:-}:" in
+    *":${AQUA_POLICY_PATH}:"*) ;;
+    *) export AQUA_POLICY_CONFIG="${AQUA_POLICY_PATH}${AQUA_POLICY_CONFIG:+:${AQUA_POLICY_CONFIG}}" ;;
+    esac
+fi
+
+# XDG config paths for tools whose macOS defaults live under Library/Application Support.
+export TLRC_CONFIG="${TLRC_CONFIG:-${XDG_CONFIG_HOME}/tlrc/config.toml}"
+export SLUMBER_CONFIG_PATH="${SLUMBER_CONFIG_PATH:-${XDG_CONFIG_HOME}/slumber/config.yml}"
+
+# Mermaid CLI (mmdc): the nix mermaid-cli ships no Chromium on macOS, so puppeteer
+# can't launch a browser. Point it at the installed Google Chrome (no-op elsewhere).
+[[ -z "${PUPPETEER_EXECUTABLE_PATH:-}" && -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]] \
+    && export PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+# Pi presentation: the repository-owned extensions follow the active Ridgeline
+# theme. These defaults are user-overridable without changing the managed files.
+export PI_STATUSLINE_PRESET="${PI_STATUSLINE_PRESET:-classic}"
+export PI_INPUT_PREFIX="${PI_INPUT_PREFIX:-›}"
+export PI_TAB_STATUS_STYLE="${PI_TAB_STATUS_STYLE:-ridgeline}"
+
+# Keep the managed hypa shim on PATH; pi-hypa can qualify its resolved path in
+# rewritten bash commands. HYPA_BIN is an optional native fast path, not a promise
+# that the package for this shell's architecture is actually installed.
+# Retire only a missing managed default inherited from an older architecture;
+# preserve explicit custom overrides outside the managed npm package tree.
+case "${HYPA_BIN:-}" in
+"$HOME/.pi/agent/npm/node_modules/@hypabolic/hypa-"*/bin/hypa)
+    [[ -x "$HYPA_BIN" ]] || unset HYPA_BIN
+    ;;
+esac
+if [[ -z "${HYPA_BIN:-}" ]]; then
+    hypa_platform_package=""
+    case "${OSTYPE:-}:${MACHTYPE:-}" in
+    darwin*:arm64*|darwin*:aarch64*) hypa_platform_package="hypa-darwin-arm64" ;;
+    darwin*:x86_64*) hypa_platform_package="hypa-darwin-x64" ;;
+    linux*:arm64*|linux*:aarch64*) hypa_platform_package="hypa-linux-arm64" ;;
+    linux*:x86_64*) hypa_platform_package="hypa-linux-x64" ;;
+    esac
+    if [[ -n "$hypa_platform_package" && -x "$HOME/.pi/agent/npm/node_modules/@hypabolic/$hypa_platform_package/bin/hypa" ]]; then
+        export HYPA_BIN="$HOME/.pi/agent/npm/node_modules/@hypabolic/$hypa_platform_package/bin/hypa"
+    fi
+fi

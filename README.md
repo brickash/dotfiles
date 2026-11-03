@@ -18,6 +18,10 @@
 │   ├── .chezmoidata/aerospace.yaml       # AeroSpace 浮动应用清单
 │   ├── .chezmoiignore                    # 部署目标的平台筛选
 │   ├── dot_gitconfig                     # ~/.gitconfig 占位文件
+│   ├── dot_custom/                       # 参考 Zsh 环境、别名和函数
+│   ├── dot_zprofile.tmpl                 # 登录环境配置
+│   ├── dot_zshenv                        # 所有 Zsh 进程读取的环境配置
+│   ├── dot_zshrc                         # 交互式 Zsh 入口
 │   ├── dot_local/bin/                    # Git 目录身份管理工具
 │   └── private_dot_config/               # 部署到 ~/.config，目录权限为 0700
 │       ├── aerospace/aerospace.toml.tmpl # AeroSpace 窗口管理配置模板
@@ -31,6 +35,8 @@
 │       ├── homebrew/Brewfile             # 本机 Homebrew 软件清单
 │       ├── mise/config.toml.tmpl         # mise 全局工具与环境配置
 │       ├── nvim/                         # 本机 LazyVim 配置
+│       ├── sheldon/plugins.toml          # Zsh 插件管理
+│       ├── starship.toml                 # Dracula 终端提示符
 │       ├── private_karabiner/
 │           └── private_karabiner.json    # Karabiner-Elements 配置
 │       └── yazi/                         # Yazi 文件管理器配置
@@ -82,6 +88,7 @@ chezmoi status
 | [mise](docs/guides/mise.md) | 工具声明、风险、部署和验证 |
 | [LazyVim](docs/guides/lazyvim.md) | 纳管范围、插件锁文件和维护 |
 | [Yazi](docs/guides/yazi.md) | 文件管理器配置、快捷键和部署 |
+| [Shell 与 Starship](docs/guides/shell.md) | Zsh 初始化、插件管理、依赖和风险 |
 | [Karabiner-Elements](docs/guides/karabiner.md) | 按键规则、来源、部署和验证 |
 | [键盘改键调查](docs/references/karabiner-modifier-keys.md) | 修饰键思路、兼容性和待验证事项 |
 

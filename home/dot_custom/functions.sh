@@ -1,0 +1,1183 @@
+# shellcheck shell=bash
+# ─────────────────────────────────────────────────────────────
+# Alt+Up/Down Directory Navigation
+# ─────────────────────────────────────────────────────────────
+_cd_up() {
+    cd .. || return 1
+    zle reset-prompt
+}
+
+_cd_back() {
+    cd - >/dev/null 2>&1 || return 1
+    zle reset-prompt
+}
+
+zle -N _cd_up
+zle -N _cd_back
+
+# Alt+Up = cd .., Alt+Down = cd -
+bindkey '^[[1;3A' _cd_up
+bindkey '^[[1;3B' _cd_back
+
+# Also support Option key on macOS Terminal.app
+bindkey '^[^[[A' _cd_up
+bindkey '^[^[[B' _cd_back
+
+# FZF-powered shell functions
+
+# ─────────────────────────────────────────────────────────────
+# ghq + fzf Integration
+# ─────────────────────────────────────────────────────────────
+
+# dev - Interactive repository selector with ghq
+# Usage: dev [query]
+# Features:
+#   - Fuzzy search through all ghq-managed repos
+#   - Preview with eza tree + README + git branch
+#   - Auto-rename tmux session
+#   - Ctrl+O: open in VS Code
+#   - Ctrl+E: open in editor
+#   - Ctrl+Y: copy path to clipboard
+dev() {
+    local repo
+    repo=$(
+        ghq list | fzf \
+            --query="${1:-}" \
+            --preview '
+            repo_path="$(ghq root)/{}"
+            echo -e "\033[1;34m📁 {}\033[0m"
+            echo ""
+            # Show git branch if available
+            if [ -d "$repo_path/.git" ]; then
+                branch=$(git -C "$repo_path" branch --show-current 2>/dev/null)
+                echo -e "\033[1;33m⎇ $branch\033[0m"
+                echo ""
+            fi
+            # Show directory tree
+            eza --tree --level=2 --color=always --icons --git-ignore "$repo_path" 2>/dev/null
+            echo ""
+            # Show README if exists
+            for readme in "$repo_path"/README{,.md,.rst,.txt} "$repo_path"/readme{,.md}; do
+                if [ -f "$readme" ]; then
+                    echo -e "\033[1;32m📖 README\033[0m"
+                    bat --color=always --style=plain --line-range=:20 "$readme" 2>/dev/null
+                    break
+                fi
+            done
+        ' \
+            --preview-window='right:55%:border-left:wrap' \
+            --header='Enter: cd | Ctrl+O: VS Code | Ctrl+E: Editor | Ctrl+Y: copy path' \
+            --bind='ctrl-o:execute-silent(code "$(ghq root)/{}"),ctrl-e:execute(${EDITOR:-nvim} "$(ghq root)/{}"),ctrl-y:execute-silent(echo "$(ghq root)/{}" | pbcopy)+abort'
+    )
+    if [[ -n "$repo" ]]; then
+        cd "$(ghq root)/$repo" || return 1
+        # Rename tmux session if inside tmux
+        if [[ -n "$TMUX" ]]; then
+            tmux rename-session "${repo##*/}"
+        fi
+    fi
+}
+
+# Ctrl+G: Quick ghq jump (ZLE widget for instant access)
+_ghq_fzf_cd() {
+    local repo
+    repo=$(
+        ghq list | fzf \
+            --height=40% \
+            --reverse \
+            --preview 'eza --tree --level=1 --color=always --icons "$(ghq root)/{}"' \
+            --preview-window='right:40%:border-left'
+    )
+    if [[ -n "$repo" ]]; then
+        # shellcheck disable=SC2034  # BUFFER is used by zle
+        BUFFER="cd \"$(ghq root)/$repo\""
+        zle accept-line
+    fi
+    zle reset-prompt
+}
+zle -N _ghq_fzf_cd
+bindkey '^g' _ghq_fzf_cd # Ctrl+G for ghq jump
+
+# Rebind navi to Ctrl+N (default is Ctrl+G which we use for ghq)
+if [[ -n "$(whence _navi_widget)" ]]; then
+    bindkey '^n' _navi_widget
+fi
+
+# ghq wrapper: no args = fzf select, with args = normal ghq
+ghq() {
+    if [[ $# -eq 0 ]]; then
+        dev
+    else
+        command ghq "$@"
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# fgc - Fuzzy git checkout (branches)
+# Usage: fgc
+# ─────────────────────────────────────────────────────────────
+fgc() {
+    local branch
+    branch=$(git branch -a --color=always |
+        grep -v '/HEAD' |
+        fzf --ansi --preview 'git log --oneline --graph --color=always {1}' |
+        sed 's/^[* ]*//' |
+        sed 's/remotes\/origin\///')
+    if [[ -n "$branch" ]]; then
+        git checkout "$branch"
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# fgl - Fuzzy git log (show commits)
+# Usage: fgl
+# ─────────────────────────────────────────────────────────────
+fgl() {
+    git log --oneline --color=always |
+        fzf --ansi --preview 'git show --color=always {1}' |
+        awk '{print $1}' |
+        xargs -I {} git show {}
+}
+
+# ─────────────────────────────────────────────────────────────
+# fga - Fuzzy git add (select files to stage)
+# Usage: fga
+# ─────────────────────────────────────────────────────────────
+fga() {
+    local selection
+    selection=$(
+        git -c core.quotepath=false status --short | fzf -m \
+            --preview '
+                line="{}"
+                path=${line#???}
+                case "$path" in
+                    *" -> "*) path=${path##* -> } ;;
+                esac
+                git diff --color=always -- "$path"
+            '
+    )
+
+    [[ -z "$selection" ]] && return 0
+
+    local -a files=()
+    local line path
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        path=${line#???}
+        case "$path" in
+        *" -> "*) path=${path##* -> } ;;
+        esac
+        [[ -n "$path" ]] && files+=("$path")
+    done <<<"$selection"
+
+    if [[ ${#files[@]} -gt 0 ]]; then
+        git add -- "${files[@]}"
+        git status -s
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# fkill - Fuzzy process kill (with confirmation)
+# Usage: fkill [-9] (use -9 for SIGKILL, default is SIGTERM)
+# ─────────────────────────────────────────────────────────────
+fkill() {
+    local signal="-15" # SIGTERM by default (graceful)
+    [[ "$1" == "-9" ]] && signal="-9"
+
+    local selection
+    selection=$(ps aux | tail -n +2 | fzf -m --header="Select process(es) to kill (SIGTERM)")
+
+    if [[ -z "$selection" ]]; then
+        return 0
+    fi
+
+    local pids
+    pids=$(echo "$selection" | awk '{print $2}')
+
+    echo "Will kill the following PIDs with signal $signal:"
+    echo "$pids"
+    echo -n "Confirm? [y/N] "
+    read -r confirm
+
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        echo "$pids" | tr '\n' '\0' | xargs -0 kill "$signal"
+        echo "Done."
+    else
+        echo "Cancelled."
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# fenv - Fuzzy environment variable viewer
+# Usage: fenv
+# ─────────────────────────────────────────────────────────────
+fenv() {
+    printenv | fzf
+}
+
+# ─────────────────────────────────────────────────────────────
+# chezmoi-cd - Quick jump to chezmoi source
+# Usage: chezmoi-cd
+# ─────────────────────────────────────────────────────────────
+chezmoi-cd() {
+    cd "$(chezmoi source-path)" || return 1
+}
+alias dotcd="chezmoi-cd"
+
+# ─────────────────────────────────────────────────────────────
+# mkcd / take - Make directory and cd into it
+# Usage: mkcd <dirname>
+# ─────────────────────────────────────────────────────────────
+mkcd() {
+    mkdir -p "$1" && cd "$1" || return 1
+}
+alias take="mkcd" # Alternative name
+
+# _aicommit_subject - Pull the commit subject out of a provider's raw output
+# Drops markdown code fences first, then takes the first non-blank line. Both
+# CLIs routinely wrap the message in ``` despite being told to return only the
+# message; without this filter the fence line itself becomes the "message", and
+# aicommit's quote/backtick cleanup then strips it to an empty string — which
+# trips the conventional-commit guard below with a blank `got:` and hides a
+# perfectly good subject on the next line.
+_aicommit_subject() {
+    grep -v '^[[:space:]]*```' "$1" 2>/dev/null | grep -m1 -v '^[[:space:]]*$'
+}
+
+# ─────────────────────────────────────────────────────────────
+# aicommit - Generate commit message with AI CLI
+# Usage: aicommit [--dry-run|-n] [provider] [type]
+# Providers: codex (default), claude, auto
+# Type: optional prefix override (wip, feat, fix, chore, etc.)
+# Config: AICOMMIT_PROVIDER env var
+# Note: For context-aware commits in Claude Code, use /commit command
+# ─────────────────────────────────────────────────────────────
+aicommit() {
+    local dry_run=false
+    local provider="${AICOMMIT_PROVIDER:-codex}"
+    local type_override=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        --dry-run | -n) dry_run=true ;;
+        claude | codex | auto) provider="$1" ;;
+        *) [[ -z "$type_override" ]] && type_override="$1" ;;
+        esac
+        shift
+    done
+
+    # Get staged diff
+    local diff
+    diff=$(git diff --cached --stat --patch)
+
+    if [[ -z "$diff" ]]; then
+        echo "No staged changes. Use 'git add' first."
+        local untracked
+        untracked=$(git ls-files --others --exclude-standard)
+        if [[ -n "$untracked" ]]; then
+            echo ""
+            echo "Untracked files (use 'git add' to include):"
+            echo "$untracked" | sed 's/^/  /'
+        fi
+        return 1
+    fi
+
+    # Prompt template
+    local type_rule="- Types: feat, fix, docs, style, refactor, perf, test, chore"
+    if [[ -n "$type_override" ]]; then
+        type_rule="- MUST use type: $type_override"
+    fi
+
+    local prompt="Generate a concise git commit message following conventional commits format.
+
+Rules:
+- Use format: type(scope): description
+${type_rule}
+- Keep the first line under 72 characters
+- Focus on WHY, not WHAT
+- No period at the end
+- Be specific but concise
+
+Diff:
+$diff
+
+Return ONLY the commit message, nothing else."
+
+    local message=""
+    local error_output=""
+
+    # Determine provider order
+    local providers=()
+    if [[ "$provider" == "auto" ]]; then
+        providers=(claude codex)
+    else
+        providers=("$provider")
+    fi
+
+    # Try providers in order
+    for p in "${providers[@]}"; do
+        [[ -n "$message" ]] && break
+        case "$p" in
+        claude)
+            command -v claude &>/dev/null || continue
+            local claude_out claude_err
+            claude_out=$(mktemp)
+            claude_err=$(mktemp)
+            # Keep stderr OUT of the message. Claude Code prints config warnings
+            # (e.g. an invalid permission rule) on stderr, and folding them into
+            # stdout with 2>&1 lets a warning become the commit message.
+            if echo "$prompt" | claude --print >"$claude_out" 2>"$claude_err"; then
+                message=$(_aicommit_subject "$claude_out")
+            else
+                error_output=$(cat "$claude_err")
+            fi
+            rm -f "$claude_out" "$claude_err"
+            ;;
+        codex)
+            command -v codex &>/dev/null || continue
+            local tmp_out
+            tmp_out=$(mktemp)
+            # Use codex exec for non-interactive mode, output to temp file
+            codex exec -o "$tmp_out" --skip-git-repo-check "$prompt" &>/dev/null || {
+                rm -f "$tmp_out"
+                continue
+            }
+            message=$(_aicommit_subject "$tmp_out")
+            rm -f "$tmp_out"
+            [[ -z "$message" ]] && continue
+            ;;
+        esac
+    done
+
+    if [[ -z "$message" ]]; then
+        echo "Failed to generate commit message with provider: $provider"
+        [[ -n "$error_output" ]] && echo -e "\nError: ${error_output:0:300}"
+        return 1
+    fi
+
+    # Clean up: remove quotes, backticks, leading/trailing whitespace
+    message=$(echo "$message" | sed -E 's/^[[:space:]`"'"'"']+//; s/[`"'"'"'[:space:]]+$//')
+
+    # Last line of defence: never turn provider noise into a commit. If a warning
+    # or preamble still reaches this point, it will not look like a conventional
+    # commit subject, so refuse rather than commit it.
+    local allowed_types='feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert'
+    [[ -n "$type_override" ]] && allowed_types="${allowed_types}|${type_override}"
+    local conventional_re="^(${allowed_types})(\([^)]+\))?!?: .+"
+    if ! [[ "$message" =~ $conventional_re ]]; then
+        echo "Refusing to commit: [$provider] did not return a conventional commit message." >&2
+        echo "  got: $message" >&2
+        return 1
+    fi
+
+    if $dry_run; then
+        echo "[$provider] $message"
+    else
+        echo "Committing: $message"
+        git commit -m "$message"
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# Direnv Helper Functions
+# ─────────────────────────────────────────────────────────────
+
+# create_direnv_venv - Create Python venv with direnv
+# Usage: create_direnv_venv
+create_direnv_venv() {
+    echo 'layout python' >.envrc
+    direnv allow
+}
+
+# create_direnv_nix - Create Nix flake environment with direnv
+# Usage: create_direnv_nix
+create_direnv_nix() {
+    echo 'use flake' >.envrc
+    direnv allow
+}
+
+# create_direnv_mise - Create mise environment with direnv
+# Usage: create_direnv_mise
+create_direnv_mise() {
+    echo 'use mise' >.envrc
+    direnv allow
+}
+
+# ─────────────────────────────────────────────────────────────
+# Project Creation
+# ─────────────────────────────────────────────────────────────
+
+# create_py_project - Quick Python project setup with uv
+# Usage: create_py_project [name]
+create_py_project() {
+    local name="${1:-.}"
+    if [[ "$name" != "." ]]; then
+        mkdir -p "$name" && cd "$name" || return 1
+    fi
+    uv init
+    create_direnv_venv
+    echo "Python project created!"
+}
+
+# ─────────────────────────────────────────────────────────────
+# System Utilities
+# ─────────────────────────────────────────────────────────────
+
+# o - Open in Finder (or default file manager)
+# Usage: o [path]
+o() {
+    open "${1:-.}"
+}
+
+# port - Show process using a specific port
+# Usage: port <port_number>
+port() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: port <port_number>"
+        return 1
+    fi
+    lsof -i ":$1"
+}
+
+# clip - Copy stdin to clipboard (cross-platform)
+# Usage: echo "text" | clip
+clip() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        pbcopy
+    else
+        xclip -selection clipboard
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# GitHub Utilities
+# ─────────────────────────────────────────────────────────────
+
+# gh_latest - Get latest release version of a GitHub repo
+# Usage: gh_latest <owner/repo>
+gh_latest() {
+    local repo="$1"
+    if [[ -z "$repo" ]]; then
+        echo "Usage: gh_latest <owner/repo>"
+        return 1
+    fi
+    gh api "repos/${repo}/releases/latest" --jq '.tag_name'
+}
+
+# gh_clone - Clone a GitHub repo to ghq root
+# Usage: gh_clone <owner/repo>
+gh_clone() {
+    local repo="$1"
+    if [[ -z "$repo" ]]; then
+        echo "Usage: gh_clone <owner/repo>"
+        return 1
+    fi
+    ghq get "https://github.com/${repo}"
+}
+
+# ─────────────────────────────────────────────────────────────
+# Quick Edit
+# ─────────────────────────────────────────────────────────────
+
+# dotfiles - Open dotfiles in editor
+# Usage: dotfiles
+dotfiles() {
+    ${EDITOR:-nvim} "$(chezmoi source-path)"
+}
+
+# zshconfig - Edit zsh config
+# Usage: zshconfig
+zshconfig() {
+    ${EDITOR:-nvim} "$(chezmoi source-path)/dot_zshrc"
+}
+
+# ─────────────────────────────────────────────────────────────
+# Development Environment Backup
+# ─────────────────────────────────────────────────────────────
+
+# backup_dev_env - Backup development environment configs
+# Usage: backup_dev_env
+backup_dev_env() {
+    local backup_dir="${1:-$(chezmoi source-path)/backups}"
+    local date_str
+    date_str=$(date +%Y%m%d)
+
+    mkdir -p "$backup_dir"
+
+    echo "Backing up development environment..."
+
+    # Brewfile
+    if command -v brew &>/dev/null; then
+        echo "  - Generating Brewfile..."
+        brew bundle dump --force --file="$backup_dir/Brewfile.$date_str"
+    fi
+
+    # mise tools
+    if command -v mise &>/dev/null; then
+        echo "  - Backing up mise config..."
+        mise list --json >"$backup_dir/mise-tools.$date_str.json" 2>/dev/null || true
+    fi
+
+    # VS Code extensions
+    if command -v code &>/dev/null; then
+        echo "  - Backing up VS Code extensions..."
+        code --list-extensions >"$backup_dir/vscode-extensions.$date_str.txt"
+    fi
+
+    # npm global packages
+    if command -v npm &>/dev/null; then
+        echo "  - Backing up npm global packages..."
+        npm list -g --depth=0 --json >"$backup_dir/npm-global.$date_str.json" 2>/dev/null || true
+    fi
+
+    echo "Backup completed: $backup_dir"
+}
+
+# restore_vscode_ext - Restore VS Code extensions from backup
+# Usage: restore_vscode_ext [backup_file]
+restore_vscode_ext() {
+    local backup_file="${1:-$(chezmoi source-path)/backups/vscode-extensions.txt}"
+    if [[ -f "$backup_file" ]]; then
+        echo "Restoring VS Code extensions from $backup_file..."
+        xargs -L 1 code --install-extension <"$backup_file"
+    else
+        echo "Backup file not found: $backup_file"
+        return 1
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# Git Utilities
+# Note: Some of these also exist as git aliases, but shell functions
+# provide additional features (cd, user feedback, etc.)
+# ─────────────────────────────────────────────────────────────
+
+# git-root - Jump to git repository root (can't be a git alias - needs cd)
+# Usage: git-root
+git-root() {
+    local root
+    root=$(git rev-parse --show-toplevel 2>/dev/null)
+    if [[ -n "$root" ]]; then
+        cd "$root" || return 1
+    else
+        echo "Not in a git repository"
+        return 1
+    fi
+}
+
+# git-undo - Undo last commit (keep changes staged)
+# Usage: git-undo
+git-undo() {
+    git reset --soft HEAD~1
+    echo "Last commit undone. Changes are staged."
+}
+
+# git-branches - Show branches sorted by last commit date
+# Usage: git-branches
+git-branches() {
+    git for-each-ref --sort=-committerdate refs/heads/ \
+        --format='%(color:blue)%(committerdate:relative)%(color:reset) %(color:green)%(refname:short)%(color:reset) %(color:yellow)%(authorname)%(color:reset)'
+}
+
+# git-cleanup - Delete merged branches
+# Usage: git-cleanup
+git-cleanup() {
+    local branches
+    branches=$(git branch --merged | grep -v '\*' | grep -v 'main' | grep -v 'master')
+    if [[ -z "$branches" ]]; then
+        echo "No merged branches to delete"
+        return 0
+    fi
+    echo "Branches to delete:"
+    echo "$branches"
+    echo ""
+    printf "Delete these branches? [y/N] "
+    read -r confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        echo "$branches" | xargs git branch -d
+        echo "Done."
+    else
+        echo "Cancelled."
+    fi
+}
+
+# gcliff - Generate changelogs with a repo-local config when present, otherwise
+# fall back to the shared dotfiles default.
+gcliff() {
+    if ! command -v git-cliff >/dev/null 2>&1; then
+        echo "git-cliff not installed"
+        return 1
+    fi
+
+    if [[ -f cliff.toml || -f git-cliff.toml ]]; then
+        git-cliff "$@"
+        return $?
+    fi
+
+    local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/git-cliff/cliff.toml"
+    if [[ -f "$cfg" ]]; then
+        git-cliff --config "$cfg" "$@"
+    else
+        git-cliff "$@"
+    fi
+}
+
+# lazydocker - Keep the shared config under XDG without exporting generic CONFIG_DIR.
+lazydocker() {
+    local cfg_dir="${XDG_CONFIG_HOME:-$HOME/.config}/lazydocker"
+    if [[ -d "$cfg_dir" ]]; then
+        CONFIG_DIR="$cfg_dir" command lazydocker "$@"
+    else
+        command lazydocker "$@"
+    fi
+}
+
+# procs - Load the shared XDG config unless the caller explicitly chooses one.
+procs() {
+    local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/procs/config.toml"
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+        --load-config | --load-config=*)
+            command procs "$@"
+            return $?
+            ;;
+        esac
+    done
+
+    if [[ -f "$cfg" ]]; then
+        command procs --load-config "$cfg" "$@"
+    else
+        command procs "$@"
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# Git Worktree Utilities
+# ─────────────────────────────────────────────────────────────
+
+_wt_repo_root() {
+    local common_dir=""
+    common_dir="$(git rev-parse --git-common-dir 2>/dev/null)" || return 1
+    if [[ "$common_dir" != /* ]]; then
+        common_dir="$(cd "$common_dir" 2>/dev/null && pwd -P)" || return 1
+    fi
+    case "$common_dir" in
+    */.git) dirname "$common_dir" ;;
+    *) git rev-parse --show-toplevel 2>/dev/null ;;
+    esac
+}
+
+_wt_in_linked_worktree() {
+    local git_dir=""
+    local common_dir=""
+    git_dir="$(git rev-parse --absolute-git-dir 2>/dev/null)" || return 1
+    common_dir="$(git rev-parse --git-common-dir 2>/dev/null)" || return 1
+    if [[ "$common_dir" != /* ]]; then
+        common_dir="$(cd "$common_dir" 2>/dev/null && pwd -P)" || return 1
+    fi
+    [[ "$git_dir" != "$common_dir" ]]
+}
+
+_wt_list_paths() {
+    local repo="$1"
+    git -C "$repo" worktree list --porcelain 2>/dev/null | awk '/^worktree / { print substr($0, 10) }'
+}
+
+_wt_branch_paths() {
+    local repo="$1"
+    git -C "$repo" worktree list --porcelain 2>/dev/null | awk '
+        /^worktree / {
+            path = substr($0, 10)
+            next
+        }
+        /^branch / {
+            branch = substr($0, 8)
+            sub(/^refs\/heads\//, "", branch)
+            print branch "\t" path
+        }
+    '
+}
+
+_wt_is_member() {
+    local repo="$1"
+    local path="$2"
+    _wt_list_paths "$repo" | grep -Fx -- "$path" >/dev/null 2>&1
+}
+
+_wt_resolve_selector() {
+    local repo="$1"
+    local selector="$2"
+    local candidate=""
+
+    [[ -n "$selector" ]] || return 1
+
+    if [[ -d "$selector" ]]; then
+        candidate="$(cd "$selector" 2>/dev/null && pwd -P)" || return 1
+        _wt_is_member "$repo" "$candidate" && {
+            echo "$candidate"
+            return 0
+        }
+        return 1
+    fi
+
+    candidate="$repo/.worktrees/$selector"
+    _wt_is_member "$repo" "$candidate" && {
+        echo "$candidate"
+        return 0
+    }
+
+    candidate="$(_wt_branch_paths "$repo" | awk -F '\t' -v b="$selector" '$1 == b { print $2; exit }')"
+    [[ -n "$candidate" ]] && {
+        echo "$candidate"
+        return 0
+    }
+
+    candidate="$(_wt_list_paths "$repo" | awk -F '/' -v n="$selector" '$NF == n { print; exit }')"
+    [[ -n "$candidate" ]] && {
+        echo "$candidate"
+        return 0
+    }
+
+    return 1
+}
+
+wt-new() {
+    local branch="${1:-}"
+    local base="${2:-}"
+
+    if [[ -z "$branch" ]]; then
+        echo "Usage: wt-new <branch> [base-ref]"
+        return 1
+    fi
+
+    local repo
+    repo="$(_wt_repo_root)" || {
+        echo "Not in a git repository"
+        return 1
+    }
+
+    if _wt_in_linked_worktree; then
+        echo "Nested worktree creation is not supported. Run wt-new from primary workspace."
+        return 1
+    fi
+
+    local target="$repo/.worktrees/$branch"
+    mkdir -p "$(dirname "$target")"
+
+    if [[ -e "$target" ]]; then
+        if _wt_is_member "$repo" "$target"; then
+            echo "Worktree already exists: $target"
+            cd "$target" || return 1
+            return 0
+        fi
+        echo "Path collision: $target exists but is not a worktree for this repository."
+        return 1
+    fi
+
+    local start_ref="$base"
+    if [[ -z "$start_ref" ]]; then
+        if git -C "$repo" rev-parse --verify --quiet origin/main >/dev/null; then
+            start_ref="origin/main"
+        elif git -C "$repo" rev-parse --verify --quiet main >/dev/null; then
+            start_ref="main"
+        fi
+    fi
+
+    if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
+        git -C "$repo" worktree add "$target" "$branch" || return 1
+    elif [[ -n "$start_ref" ]]; then
+        git -C "$repo" worktree add "$target" -b "$branch" "$start_ref" || return 1
+    else
+        git -C "$repo" worktree add "$target" -b "$branch" || return 1
+    fi
+
+    cd "$target" || return 1
+}
+
+wt-go() {
+    local repo
+    repo="$(_wt_repo_root)" || {
+        echo "Not in a git repository"
+        return 1
+    }
+
+    local selector="${1:-}"
+    local target=""
+
+    if [[ -z "$selector" ]]; then
+        if ! command -v fzf >/dev/null 2>&1; then
+            echo "Usage: wt-go <branch|path> (or install fzf for interactive selection)"
+            return 1
+        fi
+        target="$(_wt_list_paths "$repo" | fzf --header='Select worktree')"
+    else
+        target="$(_wt_resolve_selector "$repo" "$selector")" || {
+            echo "Worktree not found: $selector"
+            return 1
+        }
+    fi
+
+    [[ -n "$target" ]] || return 1
+    cd "$target" || return 1
+}
+
+wt-ls() {
+    local repo
+    repo="$(_wt_repo_root)" || {
+        echo "Not in a git repository"
+        return 1
+    }
+    git -C "$repo" worktree list
+}
+
+wt-rm() {
+    local repo
+    repo="$(_wt_repo_root)" || {
+        echo "Not in a git repository"
+        return 1
+    }
+
+    local force=false
+    local selector=""
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+        --force | -f) force=true ;;
+        *)
+            if [[ -n "$selector" ]]; then
+                echo "Usage: wt-rm [--force] <branch|path>"
+                return 1
+            fi
+            selector="$arg"
+            ;;
+        esac
+    done
+
+    local target=""
+    if [[ -z "$selector" ]]; then
+        if ! command -v fzf >/dev/null 2>&1; then
+            echo "Usage: wt-rm [--force] <branch|path> (or install fzf for interactive selection)"
+            return 1
+        fi
+        target="$(_wt_list_paths "$repo" | fzf --header='Select worktree to remove')"
+    else
+        target="$(_wt_resolve_selector "$repo" "$selector")" || {
+            echo "Worktree not found: $selector"
+            return 1
+        }
+    fi
+
+    [[ -n "$target" ]] || return 1
+
+    local current
+    current="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    if [[ "$target" == "$current" ]]; then
+        echo "Cannot remove current worktree: $target"
+        return 1
+    fi
+
+    if ! $force; then
+        printf "Remove worktree '%s'? [y/N] " "$target"
+        local confirm
+        read -r confirm
+        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            echo "Cancelled."
+            return 0
+        fi
+    fi
+
+    if $force; then
+        git -C "$repo" worktree remove --force "$target"
+    else
+        git -C "$repo" worktree remove "$target"
+    fi
+}
+
+wt-prune() {
+    local repo
+    repo="$(_wt_repo_root)" || {
+        echo "Not in a git repository"
+        return 1
+    }
+    git -C "$repo" worktree prune
+}
+
+# ─────────────────────────────────────────────────────────────
+# Quick Directory Operations
+# ─────────────────────────────────────────────────────────────
+
+# up - Go up N directories
+# Usage: up 3  (equivalent to cd ../../..)
+up() {
+    local count="${1:-1}"
+    # Validate: must be positive integer, max 20 levels
+    if ! [[ "$count" =~ ^[0-9]+$ ]] || [[ "$count" -lt 1 ]] || [[ "$count" -gt 20 ]]; then
+        echo "Usage: up <1-20>"
+        return 1
+    fi
+    local path=""
+    for ((i = 0; i < count; i++)); do
+        path="../$path"
+    done
+    cd "$path" || return 1
+}
+
+# ─────────────────────────────────────────────────────────────
+# AeroSpace Utilities (macOS only)
+# ─────────────────────────────────────────────────────────────
+
+if [[ "$OSTYPE" == darwin* ]] && command -v aerospace &>/dev/null; then
+    # wsrun - Run command in specified workspace
+    # Usage: wsrun <workspace> <command> [args...]
+    # Examples:
+    #   wsrun 5 code .              # Open VS Code in workspace 5
+    #   wsrun 4 code ~/project      # Open project in workspace 4
+    #   wsrun 6 open -a Safari      # Open Safari in workspace 6
+    #   wsrun 3 open ~/Documents    # Open Finder in workspace 3
+    wsrun() {
+        if [[ $# -lt 2 ]]; then
+            echo "Usage: wsrun <workspace> <command> [args...]"
+            echo "Examples:"
+            echo "  wsrun 5 code .          # VS Code in workspace 5"
+            echo "  wsrun 4 open -a Safari  # Safari in workspace 4"
+            return 1
+        fi
+        local workspace="$1"
+        shift
+        aerospace workspace "$workspace" && "$@"
+    }
+
+    # ws - Quick workspace switch
+    # Usage: ws <number>
+    ws() {
+        aerospace workspace "${1:-1}"
+    }
+
+    # wsm - Move current window to workspace
+    # Usage: wsm <number>
+    wsm() {
+        aerospace move-node-to-workspace "${1:-1}"
+    }
+fi
+
+# ─────────────────────────────────────────────────────────────
+# Claude Code Integration
+# ─────────────────────────────────────────────────────────────
+
+# ccc - Launch Claude Code in current directory
+# Usage: ccc [args...]
+ccc() {
+    if command -v claude &>/dev/null; then
+        claude "$@"
+    else
+        echo "Claude Code not installed. Install from: https://docs.anthropic.com/claude-code"
+        return 1
+    fi
+}
+
+# ccr - Resume last Claude Code session
+# Usage: ccr
+ccr() {
+    if command -v claude &>/dev/null; then
+        claude --resume
+    else
+        echo "Claude Code not installed"
+        return 1
+    fi
+}
+
+# ccp - Claude Code with specific prompt
+# Usage: ccp "your prompt here"
+ccp() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: ccp \"your prompt\""
+        return 1
+    fi
+    if command -v claude &>/dev/null; then
+        claude -p "$1"
+    else
+        echo "Claude Code not installed"
+        return 1
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# ccnew / ccdone — claude + worktree + dedicated tmux session
+# ─────────────────────────────────────────────────────────────
+# One branch == one worktree == one tmux session. Builds on the wt-*
+# helpers above; see `wt-new --help` for the underlying semantics.
+
+_cc_session_name() {
+    local repo="$1" branch="$2"
+    # Disambiguate across same-named repos under different owners (common in
+    # ghq layouts: ~/ghq/github.com/acme/slipway vs .../signalridge/slipway).
+    # Use owner-basename(repo)-branch, then collapse tmux-unsafe chars.
+    local owner base
+    base="$(basename "$repo")"
+    owner="$(basename "$(dirname "$repo")")"
+    printf '%s' "${owner}-${base}-${branch}" | tr './: ' '----'
+}
+
+# Usage: ccnew <branch> [base-ref]
+ccnew() {
+    local branch="${1:-}"
+    local base="${2:-}"
+
+    if [[ -z "$branch" ]]; then
+        echo "Usage: ccnew <branch> [base-ref]"
+        return 1
+    fi
+    if ! command -v claude >/dev/null 2>&1; then
+        echo "Claude Code not installed"
+        return 1
+    fi
+
+    local repo
+    repo="$(_wt_repo_root)" || {
+        echo "Not in a git repository"
+        return 1
+    }
+
+    wt-new "$branch" "$base" || return 1
+
+    local target="$PWD"
+    local session
+    session="$(_cc_session_name "$repo" "$branch")"
+
+    if ! command -v tmux >/dev/null 2>&1; then
+        claude
+        return $?
+    fi
+
+    if ! tmux has-session -t "$session" 2>/dev/null; then
+        tmux new-session -d -s "$session" -c "$target"
+        tmux send-keys -t "$session" 'claude' C-m
+    fi
+
+    if [[ -n "${TMUX:-}" ]]; then
+        tmux switch-client -t "$session"
+    else
+        tmux attach-session -t "$session"
+    fi
+}
+
+# Usage: ccdone <branch> [--force]
+ccdone() {
+    if [[ -z "${1:-}" ]]; then
+        echo "Usage: ccdone <branch> [--force]"
+        return 1
+    fi
+
+    local branch="$1"
+    shift
+
+    local repo
+    repo="$(_wt_repo_root)" || {
+        echo "Not in a git repository"
+        return 1
+    }
+
+    local session
+    session="$(_cc_session_name "$repo" "$branch")"
+
+    # Refuse upfront if we'd need to kill the session we're attached to —
+    # otherwise the user gets bounced out of their shell mid-command.
+    if [[ -n "${TMUX:-}" ]] && command -v tmux >/dev/null 2>&1 &&
+        tmux has-session -t "$session" 2>/dev/null &&
+        [[ "$(tmux display-message -p '#S')" == "$session" ]]; then
+        echo "Refusing to kill the session you're attached to: $session"
+        echo "Detach first (prefix + d) then re-run ccdone."
+        return 1
+    fi
+
+    # Remove the worktree FIRST. A dirty/untracked worktree makes
+    # `git worktree remove` fail — we don't want to have torn down the
+    # claude session before discovering that, or the user loses their
+    # running agent for nothing.
+    wt-rm "$branch" "$@" || return $?
+
+    if command -v tmux >/dev/null 2>&1 && tmux has-session -t "$session" 2>/dev/null; then
+        tmux kill-session -t "$session"
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# aichat shell integration
+# ─────────────────────────────────────────────────────────────────────────────
+# `?` invokes aichat for a one-shot question (`? why does tar -xzf fail...`).
+# Alt-e runs the current prompt buffer through `aichat -e` to translate
+# natural language into a shell command in place:
+#     find all files larger than 1G under /var<Alt-e>
+if command -v aichat >/dev/null 2>&1; then
+    # Function (not alias) so it works inside $(), eval, etc. and isn't
+    # shadowed by zsh's `?` glob metacharacter in non-command positions.
+    # Defined via eval because shellcheck/shfmt (bash parsers) reject the
+    # quoted-name function syntax even though zsh accepts it.
+    eval "'?'() { aichat \"\$@\"; }"
+
+    _aichat_zsh_widget() {
+        [[ -z "$BUFFER" ]] && return
+        local out
+        out="$(aichat -e "$BUFFER" 2>/dev/null)"
+        if [[ -n "$out" ]]; then
+            BUFFER="$out"
+            # shellcheck disable=SC2034  # CURSOR is used by zle
+            CURSOR=${#BUFFER}
+            zle reset-prompt
+        fi
+    }
+    zle -N _aichat_zsh_widget
+    bindkey '\ee' _aichat_zsh_widget
+fi
+
+# ─────────────────────────────────────────────────────────────
+# Claude Code MCP process hygiene
+# A LaunchAgent (com.signalridge.mcp-reaper) reaps orphaned MCP
+# servers every 2 hours; these are for on-demand inspection/cleanup.
+# ─────────────────────────────────────────────────────────────
+
+# List MCP servers (bunx temp dirs) with CPU/mem; flag orphans (parent = launchd).
+mcp-ps() {
+    ps -axo pid=,ppid=,pcpu=,pmem=,etime=,command= |
+        grep -E 'bunx-[0-9]+-.*mcp|markitdown-mcp|arxiv-mcp-server' | grep -v grep |
+        sort -k3 -nr |
+        awk '{
+            tag = ($2 == 1) ? "ORPHAN" : "live"
+            cmd = ""
+            for (i = 6; i <= NF; i++) cmd = cmd $i " "
+            printf "%-7s ppid=%-7s cpu=%-5s mem=%-5s %-9s %-6s %s\n", $1, $2, $3, $4, $5, tag, cmd
+          }'
+}
+
+# Reap orphaned MCP servers now (only parent = launchd; live sessions untouched).
+mcp-reap() {
+    if [[ -x "${HOME}/.local/bin/mcp-reaper" ]]; then
+        "${HOME}/.local/bin/mcp-reaper" && echo "mcp-reap done (see mcp-reaper.log)"
+    else
+        echo "mcp-reaper not installed; run: chezmoi apply" >&2
+        return 1
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────
+# sing-box proxy (127.0.0.1:7890; exit picked in its Egress selector,
+# panel http://127.0.0.1:9090/ui). Nothing uses it unless opted in:
+# the browser via a proxy extension, a shell via proxy-on.
+# ─────────────────────────────────────────────────────────────
+
+# Route this shell's CLI traffic through sing-box.
+proxy-on() {
+    local url="http://127.0.0.1:7890"
+    export http_proxy="$url" https_proxy="$url" all_proxy="socks5h://127.0.0.1:7890"
+    export HTTP_PROXY="$http_proxy" HTTPS_PROXY="$https_proxy" ALL_PROXY="$all_proxy"
+    export no_proxy="localhost,127.0.0.1,::1,10.144.144.0/24,100.64.0.0/10,.local"
+    export NO_PROXY="$no_proxy"
+    echo "proxy on: $url"
+}
+
+proxy-off() {
+    unset http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY no_proxy NO_PROXY
+    echo "proxy off"
+}

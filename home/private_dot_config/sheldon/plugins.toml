@@ -1,0 +1,69 @@
+# `sheldon` configuration file
+# ----------------------------
+#
+# You can modify this file directly or you can use one of the following
+# `sheldon` commands which are provided to assist in editing the config file:
+#
+# - `sheldon add` to add a new plugin to the config file
+# - `sheldon edit` to open up the config file in the default editor
+# - `sheldon remove` to remove a plugin from the config file
+#
+# See the documentation for more https://github.com/rossmacarthur/sheldon#readme
+
+shell = "zsh"
+
+[plugins]
+# TMux auto-start (must load early, no defer)
+[plugins.tmux]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/tmux"
+use = ["tmux.plugin.zsh"]
+
+[plugins.zsh-defer]
+github = "romkatv/zsh-defer"
+
+[templates]
+defer = "{{ hooks?.pre | nl }}{% for file in files %}zsh-defer source \"{{ file }}\"\n{% endfor %}{{ hooks?.post | nl }}"
+
+[plugins.zsh-autosuggestions]
+apply = ["defer"]
+github = 'zsh-users/zsh-autosuggestions'
+use = ['{{ name }}.zsh']
+[plugins.zsh-autosuggestions.hooks]
+post = """
+zsh-defer -c '
+# Autosuggestions keybindings
+bindkey "^e" autosuggest-accept   # Ctrl+E: accept suggestion (fill command line)
+bindkey "^w" autosuggest-execute  # Ctrl+W: execute suggestion directly
+'
+"""
+
+[plugins.base16]
+github = 'chriskempson/base16-shell'
+
+[plugins.clipboard]
+apply = ["defer"]
+github = 'zpm-zsh/clipboard'
+
+[plugins.zsh-you-should-use]
+apply = ["defer"]
+github = 'MichaelAquilina/zsh-you-should-use'
+
+[plugins.enhancd]
+apply = ["defer"]
+github = "b4b4r07/enhancd"
+
+[plugins.zsh-terraform]
+apply = ["defer"]
+github = 'macunha1/zsh-terraform'
+
+[plugins.ripgrep-shell-completions]
+apply = ["fpath"]
+remote = "https://github.com/BurntSushi/ripgrep/raw/master/crates/core/flags/complete/rg.zsh"
+
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"
+
+# fzf-tab: replaces default completion menu with fzf
+[plugins.fzf-tab]
+github = 'Aloxaf/fzf-tab'

@@ -28,3 +28,4 @@ sourceDir: {{ .chezmoi.workingTree | quote }}
 data:
   name: {{ $name | quote }}
   email: {{ $email | quote }}
+  platform: {{ .chezmoi.os | quote }}

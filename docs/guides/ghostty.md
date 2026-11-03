@@ -4,7 +4,7 @@
 
 ## 来源与纳管范围
 
-仓库中的 `home/private_dot_config/ghostty/config` 部署到 `~/.config/ghostty/config`。它从本机配置纳管，以 [lltx 的现代化终端配置指南](https://gist.github.com/lltx/a61f98fdb761c9af7c5fd6cbfe963842)的 Ghostty 部分为参考，不自动同步该指南。Yazi 配置另见 [Yazi 指南](yazi.md)；仓库未纳管指南中的 Zoxide 或 Oh-My-Zsh 初始化配置。
+仓库中的 `home/private_dot_config/ghostty/config` 部署到 `~/.config/ghostty/config`。它从本机配置纳管，以 [lltx 的现代化终端配置指南](https://gist.github.com/lltx/a61f98fdb761c9af7c5fd6cbfe963842)的 Ghostty 部分为参考，不自动同步该指南。Yazi 配置另见 [Yazi 指南](yazi.md)；Zoxide 初始化使用 [Shell 配置](shell.md)，不是照搬此指南中的 Oh-My-Zsh 配置。
 
 参考配置使用 `Kanagawa Wave`；本机调整为 Ghostty 内置的 `Dracula`。其他候选主题保留为注释，只有一条生效的 `theme` 配置。
 

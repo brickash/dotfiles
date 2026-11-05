@@ -1,3 +1,4 @@
+tap "abue-ammar/tinycast"
 tap "am2rican5/sigye"
 tap "anomalyco/tap", trusted: true
 tap "aquaproj/aqua", trusted: true
@@ -18,6 +19,8 @@ brew "bash"
 brew "bat"
 # Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "btop"
+# Incredibly fast JavaScript runtime, bundler, test runner, and package manager
+brew "bun"
 # Multi-shell multi-command argument completer
 brew "carapace"
 # Tool for emulating mouse and keyboard events
@@ -158,6 +161,7 @@ cask "switchhosts"
 cask "tencent-lemon"
 # Menu bar manager
 cask "thaw"
+cask "tinycast"
 # Open-source code editor
 cask "visual-studio-code"
 # Multimedia player

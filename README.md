@@ -43,6 +43,7 @@
 │       ├── sheldon/plugins.toml          # Zsh 插件管理
 │       ├── starship.toml                 # Dracula 终端提示符
 │       ├── tmux/                         # tmux 会话、快捷键与插件配置
+│       ├── tinycast/settings.json        # Tinycast 设置、快捷键与窗口管理
 │       ├── private_karabiner/
 │           └── private_karabiner.json    # Karabiner-Elements 配置
 │       └── yazi/                         # Yazi 文件管理器配置
@@ -91,6 +92,7 @@ chezmoi status
 | [Ghostty](docs/guides/ghostty.md) | 配置来源、快捷键、部署和验证 |
 | [AeroSpace](docs/guides/aerospace.md) | 窗口布局、快捷键、浮动规则及部署 |
 | [Homebrew](docs/guides/homebrew.md) | Brewfile 来源、维护和安装边界 |
+| [Tinycast](docs/guides/tinycast.md) | 设置文件同步、纳管边界和部署 |
 | [mise](docs/guides/mise.md) | 工具声明、风险、部署和验证 |
 | [LazyVim](docs/guides/lazyvim.md) | 纳管范围、插件锁文件和维护 |
 | [LazyGit](docs/guides/lazygit.md) | Git 界面主题、使用和部署 |

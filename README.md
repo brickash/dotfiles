@@ -24,6 +24,7 @@
 │   ├── dot_zshenv                        # 所有 Zsh 进程读取的环境配置
 │   ├── dot_zshrc                         # 交互式 Zsh 入口
 │   ├── dot_local/bin/                    # Git 目录身份管理工具
+│   ├── dot_omp/                          # OMP 全局主配置目录
 │   └── private_dot_config/               # 部署到 ~/.config，目录权限为 0700
 │       ├── aerospace/aerospace.toml.tmpl # AeroSpace 窗口管理配置模板
 │       ├── private_atuin/                # Atuin 历史搜索配置
@@ -93,6 +94,7 @@ chezmoi status
 | [AeroSpace](docs/guides/aerospace.md) | 窗口布局、快捷键、浮动规则及部署 |
 | [Homebrew](docs/guides/homebrew.md) | Brewfile 来源、维护和安装边界 |
 | [Tinycast](docs/guides/tinycast.md) | 设置文件同步、纳管边界和部署 |
+| [OMP](docs/guides/omp.md) | 主配置、配置层级、纳管边界和部署 |
 | [mise](docs/guides/mise.md) | 工具声明、风险、部署和验证 |
 | [LazyVim](docs/guides/lazyvim.md) | 纳管范围、插件锁文件和维护 |
 | [LazyGit](docs/guides/lazygit.md) | Git 界面主题、使用和部署 |

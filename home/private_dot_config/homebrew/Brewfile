@@ -37,6 +37,8 @@ brew "fd"
 brew "ffmpegthumbnailer"
 # Command-line fuzzy finder written in Go
 brew "fzf"
+# Nonsense activity generator
+brew "genact"
 # GitHub command-line tool
 brew "gh"
 # Remote repository management made easy
@@ -89,6 +91,8 @@ brew "sesh"
 brew "sheldon"
 # Cross-shell prompt for astronauts
 brew "starship"
+# Open source continuous file synchronization application
+brew "syncthing"
 # Command-line tool to interact with Gitea servers
 brew "tea"
 # Terminal multiplexer

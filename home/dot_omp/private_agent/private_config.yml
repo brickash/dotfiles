@@ -9,3 +9,5 @@ setupVersion: 2
 dev:
   autoqaConsent: granted
 defaultThinkingLevel: auto
+startup:
+  checkUpdate: false

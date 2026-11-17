@@ -12,6 +12,7 @@
 ├── docs/                                 # 工具指南与参考调查，不部署
 ├── install.sh                            # 安装 chezmoi 并初始化、应用配置
 ├── scripts/readme-tree.sh                # 对齐 README 结构树注释
+├── scripts/macos-defaults.sh             # 手动恢复选定的 macOS 系统设置
 ├── tests/                                # Git 身份功能回归测试
 ├── home/                                 # chezmoi 部署源
 │   ├── .chezmoi.yaml.tmpl                # 初始化模板：仓库路径和身份数据
@@ -84,6 +85,14 @@ chezmoi status
 ```
 
 也可以运行 `./install.sh`；它会在缺少 chezmoi 时下载安装，然后直接执行初始化和应用。执行前请先审阅脚本和 `chezmoi diff`。
+
+macOS 重装后可手动恢复已纳管的系统偏好（当前为 Dock 靠左、不自动隐藏）：
+
+```sh
+./scripts/macos-defaults.sh
+```
+
+执行前请审阅脚本；脚本会重启 Dock，不会在 `chezmoi apply` 时自动运行。
 
 ### 工具指南
 

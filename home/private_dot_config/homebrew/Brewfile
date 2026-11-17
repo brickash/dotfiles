@@ -75,6 +75,7 @@ brew "mmdbctl"
 brew "mole"
 # Open source relational database management system
 brew "mysql-client"
+brew "mysql@8.4", link: true
 # Interactive cheatsheet tool for the command-line
 brew "navi"
 # Ambitious Vim-fork focused on extensibility and agility
@@ -83,6 +84,7 @@ brew "neovim"
 brew "node"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
+brew "postgresql@16", link: true
 # Persistent key-value database, with built-in net interface
 brew "redis"
 # Smart session manager for the terminal
@@ -115,10 +117,12 @@ brew "can1357/tap/omp", trusted: true
 brew "netbirdio/tap/netbird", trusted: true
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "nikitabobko/tap/aerospace", trusted: true
+cask "bitwarden"
 # OpenAI's official ChatGPT desktop app
 cask "chatgpt"
 # Terminal-based AI coding assistant
 cask "claude-code"
+cask "codex"
 # Server and cloud storage browser
 cask "cyberduck"
 # Database management tool
@@ -145,8 +149,6 @@ cask "keycastr"
 cask "maczip"
 # Smooths scrolling and set mouse scroll directions independently
 cask "mos"
-# Netbird UI Client
-cask "netbirdio/tap/netbird-ui", trusted: true
 # Open-source software for live streaming and screen recording
 cask "obs"
 # Knowledge base that works on top of a local folder of plain text Markdown files
@@ -174,7 +176,6 @@ cask "vlc"
 cask "workbuddy-cn"
 # Tencent AI Assistant with Hunyuan and DeepSeek LLMs
 cask "yuanbao"
-mas "Bitwarden", id: 1352778147
 mas "QQ", id: 451108668
 mas "Windows App", id: 1295203466
 mas "WPS Office", id: 1443749478
@@ -185,6 +186,7 @@ mas "腾讯会议", id: 1484048379
 mas "钉钉", id: 1435447041
 mas "飞书", id: 1551632588
 vscode "catppuccin.catppuccin-vsc"
+vscode "cweijan.vscode-office"
 vscode "davidanson.vscode-markdownlint"
 vscode "dracula-theme.theme-dracula"
 vscode "editorconfig.editorconfig"

@@ -1,14 +1,14 @@
-tap "abue-ammar/tinycast"
-tap "am2rican5/sigye"
+tap "abue-ammar/tinycast", trusted: true
+tap "am2rican5/sigye", trusted: true
 tap "anomalyco/tap", trusted: true
 tap "aquaproj/aqua", trusted: true
-tap "can1357/tap"
+tap "can1357/tap", trusted: true
 tap "my-monkeys/tap", trusted: true
 tap "netbirdio/tap", trusted: true
-tap "nikitabobko/tap"
-tap "qzz0518/tap"
+tap "nikitabobko/tap", trusted: true
+tap "qzz0518/tap", trusted: true
 tap "rockythink/tap", trusted: true
-tap "stablyai/orca"
+tap "stablyai/orca", trusted: true
 # Simple, modern, secure file encryption
 brew "age"
 # Improved shell history for zsh, bash, fish and nushell
@@ -53,6 +53,8 @@ brew "git-lfs"
 brew "go-task"
 # Slightly more awesome Standard Unix Password Manager for Teams
 brew "gopass"
+# Agent multiplexer that lives in your terminal
+brew "herdr"
 # Development kit for the Java programming language
 brew "openjdk"
 # Dex to Java decompiler
@@ -75,6 +77,7 @@ brew "mmdbctl"
 brew "mole"
 # Open source relational database management system
 brew "mysql-client"
+# Open source relational database management system
 brew "mysql@8.4", link: true
 # Interactive cheatsheet tool for the command-line
 brew "navi"
@@ -84,6 +87,7 @@ brew "neovim"
 brew "node"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
+# Object-relational database system
 brew "postgresql@16", link: true
 # Persistent key-value database, with built-in net interface
 brew "redis"
@@ -110,18 +114,20 @@ brew "zoxide"
 # UNIX shell (command interpreter)
 brew "zsh"
 # Beautiful terminal clock with ASCII art fonts
-brew "am2rican5/sigye/sigye", trusted: true
+brew "am2rican5/sigye/sigye"
 # Coding agent with the IDE wired in
-brew "can1357/tap/omp", trusted: true
+brew "can1357/tap/omp"
 # Netbird project.
-brew "netbirdio/tap/netbird", trusted: true
+brew "netbirdio/tap/netbird"
 # AeroSpace is an i3-like tiling window manager for macOS
-cask "nikitabobko/tap/aerospace", trusted: true
+cask "nikitabobko/tap/aerospace"
+# Desktop password and login vault
 cask "bitwarden"
 # OpenAI's official ChatGPT desktop app
 cask "chatgpt"
 # Terminal-based AI coding assistant
 cask "claude-code"
+# OpenAI's coding agent that runs in your terminal
 cask "codex"
 # Server and cloud storage browser
 cask "cyberduck"
@@ -129,14 +135,20 @@ cask "cyberduck"
 cask "dbx"
 # App to build and share containerised applications and microservices
 cask "docker-desktop"
+# Web browser focusing on privacy
+cask "duckduckgo"
 # Forward WeChat chat history to Codex, Claude or any app from the Share menu
-cask "qzz0518/tap/dukou", trusted: true
+cask "qzz0518/tap/dukou"
+# Dictionary and translator app
+cask "easydict"
 cask "font-lxgw-wenkai"
 cask "font-maple-mono-nf-cn"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
 # Web browser
 cask "google-chrome"
+# Desktop app for terminals and coding agents
+cask "herdr-app"
 # Homebrew's official GUI
 cask "homebrew-app"
 # Java IDE by JetBrains
@@ -167,6 +179,7 @@ cask "switchhosts"
 cask "tencent-lemon"
 # Menu bar manager
 cask "thaw"
+# Application launcher and productivity tool
 cask "tinycast"
 # Open-source code editor
 cask "visual-studio-code"
@@ -174,17 +187,19 @@ cask "visual-studio-code"
 cask "vlc"
 # AI agent for everyday office work
 cask "workbuddy-cn"
+# All-in-one office service platform in Chinese
+cask "wpsoffice-cn"
 # Tencent AI Assistant with Hunyuan and DeepSeek LLMs
 cask "yuanbao"
+mas "BaiduNetdisk", id: 547166701
+mas "DingTalk", id: 1435447041
+mas "Feishu", id: 1551632588
+mas "NetEaseMusic", id: 944848654
 mas "QQ", id: 451108668
+mas "TencentMeeting", id: 1484048379
+mas "WeChat", id: 836500024
 mas "Windows App", id: 1295203466
-mas "WPS Office", id: 1443749478
-mas "微信", id: 836500024
-mas "百度网盘", id: 547166701
-mas "网易云音乐", id: 944848654
-mas "腾讯会议", id: 1484048379
-mas "钉钉", id: 1435447041
-mas "飞书", id: 1551632588
+mas "同花顺", id: 1247341465
 vscode "catppuccin.catppuccin-vsc"
 vscode "cweijan.vscode-office"
 vscode "davidanson.vscode-markdownlint"
@@ -217,3 +232,5 @@ vscode "vscjava.vscode-maven"
 vscode "vue.volar"
 vscode "zainchen.json"
 uv "trafilatura"
+npm "@deepseek-ai/dsh"
+npm "pnpm"

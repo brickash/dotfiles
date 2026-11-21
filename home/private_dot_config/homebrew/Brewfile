@@ -8,7 +8,6 @@ tap "netbirdio/tap", trusted: true
 tap "nikitabobko/tap", trusted: true
 tap "qzz0518/tap", trusted: true
 tap "rockythink/tap", trusted: true
-tap "stablyai/orca", trusted: true
 # Simple, modern, secure file encryption
 brew "age"
 # Improved shell history for zsh, bash, fish and nushell
@@ -29,6 +28,8 @@ brew "cliclick"
 brew "difftastic"
 # Load/unload environment variables based on $PWD
 brew "direnv"
+# Select default apps for documents and URL schemes on macOS
+brew "duti"
 # Modern, maintained replacement for ls
 brew "eza"
 # Simple, fast and user-friendly alternative to find
@@ -121,7 +122,7 @@ brew "can1357/tap/omp"
 brew "netbirdio/tap/netbird"
 # AeroSpace is an i3-like tiling window manager for macOS
 cask "nikitabobko/tap/aerospace"
-# Desktop password and login vault
+# Open source desktop password manager with encrypted vault and autofilling
 cask "bitwarden"
 # OpenAI's official ChatGPT desktop app
 cask "chatgpt"
@@ -165,8 +166,6 @@ cask "mos"
 cask "obs"
 # Knowledge base that works on top of a local folder of plain text Markdown files
 cask "obsidian"
-# IDE for orchestrating AI coding agents across terminals and worktrees
-cask "stablyai/orca/orca", trusted: true
 # Control your tools with a few keystrokes
 cask "raycast"
 # Open source virtual/remote desktop application
